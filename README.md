@@ -12,7 +12,7 @@ A [Guild Wars](https://www.guildwars.com) build template encoder/decoder
 [php-badge]: https://img.shields.io/packagist/php-v/buildwars/gw-templates?logo=php&color=8892BF&logoColor=fff
 [php]: https://www.php.net/supported-versions.php
 [packagist-badge]: https://img.shields.io/packagist/v/buildwars/gw-templates.svg?logo=packagist&logoColor=fff
-[packagist]: https://packagist.org/packages/build-wars/gw-templates
+[packagist]: https://packagist.org/packages/buildwars/gw-templates
 [license-badge]: https://img.shields.io/github/license/build-wars/gw-templates.svg
 [license]: https://github.com/build-wars/gw-templates/blob/main/LICENSE
 [gh-action-badge]: https://img.shields.io/github/actions/workflow/status/build-wars/gw-templates/ci.yml?branch=main&logo=github&logoColor=fff
@@ -20,7 +20,7 @@ A [Guild Wars](https://www.guildwars.com) build template encoder/decoder
 [coverage-badge]: https://img.shields.io/codecov/c/github/build-wars/gw-templates.svg?logo=codecov&logoColor=fff
 [coverage]: https://codecov.io/github/build-wars/gw-templates
 [downloads-badge]: https://img.shields.io/packagist/dt/buildwars/gw-templates.svg?logo=packagist&logoColor=fff
-[downloads]: https://packagist.org/packages/build-wars/gw-templates/stats
+[downloads]: https://packagist.org/packages/buildwars/gw-templates/stats
 
 # Overview
 
