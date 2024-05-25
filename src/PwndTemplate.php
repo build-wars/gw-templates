@@ -32,6 +32,8 @@ use const SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING;
 /**
  * Encodes and decodes paw·ned² team build templates
  *
+ * Thanks to Antodias (formerly gwcom.de)
+ *
  * @link https://memorial.redeemer.biz/pawned2/
  */
 final class PwndTemplate extends TemplateAbstract{
