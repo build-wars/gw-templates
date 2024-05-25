@@ -9,17 +9,17 @@ A [Guild Wars](https://www.guildwars.com) build template encoder/decoder
 [![CodeCov][coverage-badge]][coverage]
 [![Packagist downloads][downloads-badge]][downloads]
 
-[php-badge]: https://img.shields.io/packagist/php-v/build-wars/gw-templates?logo=php&color=8892BF&logoColor=fff
+[php-badge]: https://img.shields.io/packagist/php-v/buildwars/gw-templates?logo=php&color=8892BF&logoColor=fff
 [php]: https://www.php.net/supported-versions.php
-[packagist-badge]: https://img.shields.io/packagist/v/build-wars/gw-templates.svg?logo=packagist&logoColor=fff
+[packagist-badge]: https://img.shields.io/packagist/v/buildwars/gw-templates.svg?logo=packagist&logoColor=fff
 [packagist]: https://packagist.org/packages/build-wars/gw-templates
-[license-badge]: https://img.shields.io/github/license/build-wars/gw-templates
+[license-badge]: https://img.shields.io/github/license/build-wars/gw-templates.svg
 [license]: https://github.com/build-wars/gw-templates/blob/main/LICENSE
 [gh-action-badge]: https://img.shields.io/github/actions/workflow/status/build-wars/gw-templates/ci.yml?branch=main&logo=github&logoColor=fff
 [gh-action]: https://github.com/build-wars/gw-templates/actions/workflows/ci.yml?query=branch%3Amain
 [coverage-badge]: https://img.shields.io/codecov/c/github/build-wars/gw-templates.svg?logo=codecov&logoColor=fff
 [coverage]: https://codecov.io/github/build-wars/gw-templates
-[downloads-badge]: https://img.shields.io/packagist/dt/build-wars/gw-templates.svg?logo=packagist&logoColor=fff
+[downloads-badge]: https://img.shields.io/packagist/dt/buildwars/gw-templates.svg?logo=packagist&logoColor=fff
 [downloads]: https://packagist.org/packages/build-wars/gw-templates/stats
 
 # Overview
