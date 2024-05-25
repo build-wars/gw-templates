@@ -65,6 +65,18 @@ Note: check the [releases](https://github.com/buildwars/gw-templates/releases) f
 
 ### Skill templates
 
+**Encode**
+
+```php
+$code = (new SkillTemplate)->encode(
+	prof_pri:   7,
+	prof_sec:   1,
+	attributes: [29 => 12, 31 => 3, 35 => 12],
+	skills:     [782, 780, 775, 1954, 952, 2356, 1649, 1018],
+);
+// -> base64 skill template
+```
+
 **Decode**
 
 ```php
@@ -97,22 +109,27 @@ Array
 )
 ```
 
-**Encode**
-
-```php
-$code = (new SkillTemplate)->encode(
-	prof_pri:   7,
-	prof_sec:   1,
-	attributes: [29 => 12, 31 => 3, 35 => 12],
-	skills:     [782, 780, 775, 1954, 952, 2356, 1649, 1018],
-);
-// -> base64 skill template
-```
-
 Please note that the codes might not necessarily match between decode/encode.
 
 
 ### Equipment templates
+
+**Encode**
+
+```php
+$equipmentTemplate = new EquipmentTemplate;
+
+// add iems (will overwrite previous items with same slot id)
+$equipmentTemplate->addItem(
+	id:    279,
+	color: 0,
+	mods:  [190, 204, 329],
+);
+
+// ... add more items
+
+$code = $equipmentTemplate->encode(); // -> base64 equipment template
+```
 
 **Decode**
 
@@ -193,25 +210,26 @@ Array
 )
 ```
 
+
+### paw·ned² templates
+
 **Encode**
 
 ```php
-$equipmentTemplate = new EquipmentTemplate;
+$pwndTemplate = new PwndTemplate;
 
-// add iems (will overwrite previous items with same slot id)
-$equipmentTemplate->addItem(
-	id:    279,
-	color: 0,
-	mods:  [190, 204, 329],
+$pwndTemplate->addBuild(
+	skills:      'OwFj0xfzITOMMMHMie4O0kxZ6PA',
+	equipment:   'PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF',
+	weaponsets:  ['PcZQ8zoRpkC'],
+	player:      '<assigned player/hero>',
+	description: '<build name>' . "\r\n" . '<description>',
 );
 
-// ... add more items
+// add more builds (up to 12)
 
-$code = $equipmentTemplate->encode(); // -> base64 equipment template
+$pwnd = $pwndTemplate->encode(); // -> pwnd template code
 ```
-
-
-### paw·ned² templates
 
 **Decode**
 
@@ -372,24 +390,6 @@ secondary profession and elite skill are free, barbs is optional
             [description] => 7 - E/Mo
         )
 )
-```
-
-**Encode**
-
-```php
-$pwndTemplate = new PwndTemplate;
-
-$pwndTemplate->addBuild(
-	skills:      'OwFj0xfzITOMMMHMie4O0kxZ6PA',
-	equipment:   'PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF',
-	weaponsets:  ['PcZQ8zoRpkC'],
-	player:      '<assigned player/hero>',
-	description: '<build name>' . "\r\n" . '<description>',
-);
-
-// add more builds (up to 12)
-
-$pwnd = $pwndTemplate->encode(); // -> pwnd template code
 ```
 
 # Disclaimer
