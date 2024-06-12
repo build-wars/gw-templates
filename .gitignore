@@ -13,6 +13,7 @@
 # project stuff
 .build/*
 vendor/*
+node_modules/*
 composer.lock
 phpcs.xml
 phpdoc.xml
