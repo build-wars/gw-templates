@@ -4,22 +4,25 @@ A [Guild Wars](https://www.guildwars.com) build template encoder/decoder
 
 [![PHP Version Support][php-badge]][php]
 [![Packagist version][packagist-badge]][packagist]
+[![NPM version][npm-badge]][npm]
 [![License][license-badge]][license]
 [![Continuous Integration][gh-action-badge]][gh-action]
 [![CodeCov][coverage-badge]][coverage]
 [![Packagist downloads][downloads-badge]][downloads]
 
-[php-badge]: https://img.shields.io/packagist/php-v/buildwars/gw-templates?logo=php&color=8892BF&logoColor=fff
+[php-badge]: https://img.shields.io/packagist/php-v/buildwars/gw-templates?logo=php&color=8892BF&logoColor=ccc
 [php]: https://www.php.net/supported-versions.php
-[packagist-badge]: https://img.shields.io/packagist/v/buildwars/gw-templates.svg?logo=packagist&logoColor=fff
+[packagist-badge]: https://img.shields.io/packagist/v/buildwars/gw-templates.svg?logo=packagist&logoColor=ccc
 [packagist]: https://packagist.org/packages/buildwars/gw-templates
+[npm-badge]: https://img.shields.io/npm/v/@buildwars/gw-templates?logo=npm&logoColor=ccc
+[npm]: https://www.npmjs.com/package/@buildwars/gw-templates
 [license-badge]: https://img.shields.io/github/license/build-wars/gw-templates.svg
 [license]: https://github.com/build-wars/gw-templates/blob/main/LICENSE
-[gh-action-badge]: https://img.shields.io/github/actions/workflow/status/build-wars/gw-templates/ci.yml?branch=main&logo=github&logoColor=fff
+[gh-action-badge]: https://img.shields.io/github/actions/workflow/status/build-wars/gw-templates/ci.yml?branch=main&logo=github&logoColor=ccc
 [gh-action]: https://github.com/build-wars/gw-templates/actions/workflows/ci.yml?query=branch%3Amain
-[coverage-badge]: https://img.shields.io/codecov/c/github/build-wars/gw-templates.svg?logo=codecov&logoColor=fff
+[coverage-badge]: https://img.shields.io/codecov/c/github/build-wars/gw-templates.svg?logo=codecov&logoColor=ccc
 [coverage]: https://codecov.io/github/build-wars/gw-templates
-[downloads-badge]: https://img.shields.io/packagist/dt/buildwars/gw-templates.svg?logo=packagist&logoColor=fff
+[downloads-badge]: https://img.shields.io/packagist/dt/buildwars/gw-templates.svg?logo=packagist&logoColor=ccc
 [downloads]: https://packagist.org/packages/buildwars/gw-templates/stats
 
 # Overview
@@ -36,9 +39,15 @@ templates, as well as [paw·ned²](https://memorial.redeemer.biz/pawned2/) team 
 - PHP 8.1+
   - `ext-sodium`
 
+alternatively:
+
+- Javascript
+  - node.js >= 20
+  - a web browser
+
 # Documentation
 
-## Installation with [composer](https://getcomposer.org)
+## PHP: Installation with [composer](https://getcomposer.org)
 
 ### Terminal
 
@@ -61,6 +70,27 @@ composer require buildwars/gw-templates
 Note: check the [releases](https://github.com/buildwars/gw-templates/releases) for valid versions.
 
 
+## JS: Installation with [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+
+### Terminal
+
+```
+npm install @buildwars/gw-templates
+```
+
+
+### package.json
+
+```json
+{
+	"dependencies": {
+		"@buildwars/gw-templates": "^1.0"
+	}
+}
+```
+
+
+
 ## Usage
 
 ### Skill templates
@@ -77,10 +107,24 @@ $code = (new SkillTemplate)->encode(
 // -> base64 skill template
 ```
 
+```js
+let code = new SkillTemplate().encode(
+	7,
+	1,
+	{'29': 12, '31': 3, '35': 12},
+	[782, 780, 775, 1954, 952, 2356, 1649, 1018],
+);
+// -> base64 skill template
+```
+
 **Decode**
 
 ```php
 $skills = (new SkillTemplate)->decode('OwFj0xfzITOMMMHMie4O0kxZ6PA');
+```
+
+```js
+let skills = new SkillTemplate().decode('OwFj0xfzITOMMMHMie4O0kxZ6PA');
 ```
 
 ```
@@ -131,11 +175,28 @@ $equipmentTemplate->addItem(
 $code = $equipmentTemplate->encode(); // -> base64 equipment template
 ```
 
+```js
+let equipmentTemplate = new EquipmentTemplate();
+
+// add iems (will overwrite previous items with same slot id)
+equipmentTemplate.addItem(279, 0, [190, 204, 329]);
+
+// ... add more items
+
+let code = equipmentTemplate.encode(); // -> base64 equipment template
+```
+
 **Decode**
 
 ```php
 $equipment = (new EquipmentTemplate)->decode('PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF');
 ```
+
+```js
+let equipment = new EquipmentTemplate().decode('PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF');
+```
+
+Note: the keys of the returned array are the slot IDs (0-6) - they may not be sequential or ordered
 
 ```
 Array
@@ -152,61 +213,8 @@ Array
                     [2] => 329
                 )
         )
-    [2] => Array
-        (
-            [id] => 164
-            [slot] => 2
-            [color] => 9
-            [mods] => Array
-                (
-                    [0] => 290
-                    [1] => 158
-                )
-        )
-    [3] => Array
-        (
-            [id] => 166
-            [slot] => 3
-            [color] => 9
-            [mods] => Array
-                (
-                    [0] => 290
-                    [1] => 353
-                )
-        )
-    [4] => Array
-        (
-            [id] => 271
-            [slot] => 4
-            [color] => 9
-            [mods] => Array
-                (
-                    [0] => 290
-                    [1] => 179
-                )
-        )
-    [5] => Array
-        (
-            [id] => 0
-            [slot] => 5
-            [color] => 9
-            [mods] => Array
-                (
-                    [0] => 290
-                    [1] => 165
-                )
-        )
-    [6] => Array
-        (
-            [id] => 165
-            [slot] => 6
-            [color] => 9
-            [mods] => Array
-                (
-                    [0] => 290
-                    [1] => 162
-                )
-        )
+
+    ...more items...
 )
 ```
 
@@ -223,7 +231,7 @@ $pwndTemplate->addBuild(
 	equipment:   'PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF',
 	weaponsets:  ['PcZQ8zoRpkC'],
 	player:      '<assigned player/hero>',
-	description: '<build name>' . "\r\n" . '<description>',
+	description: "<build name>\r\n<description>",
 );
 
 // add more builds (up to 12)
@@ -231,10 +239,27 @@ $pwndTemplate->addBuild(
 $pwnd = $pwndTemplate->encode(); // -> pwnd template code
 ```
 
+```js
+let pwndTemplate = new PwndTemplate();
+
+pwndTemplate.addBuild(
+	'OwFj0xfzITOMMMHMie4O0kxZ6PA',
+	'PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF',
+	['PcZQ8zoRpkC'],
+	'<assigned player/hero>',
+	'<build name>\r\n<description>',
+);
+
+// add more builds (up to 12)
+
+let pwnd = pwndTemplate.encode(); // -> pwnd template code
+```
+
 **Decode**
 
-```php
-$pwnd = <<<PWND
+The paw-ned² template:
+
+```
 pwnd0000?download paw·ned² @ www.gw-tactics.de Copyright numma_cway aka Redeemer
 >aOwFj0xfzITOMMMHMie4O0k6PxZpPkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFFAAACgJAAMM
 SAtIFdvdEEKZOAOj4wiM5MXTMm3cZS9dJOu5BpPkppFFEqtEAFEqncAFEaqmAFEaY7/EEaYRIHeqXjEA
@@ -250,9 +275,14 @@ glAj4ngdQVFAQZAoPgpxlne9rPVaYKSPNvMFJYJRmiEKtATRGW7ipI7AAAAAABgNSAtIE1vUApzZWNvb
 mRhcnkgcHJvZmVzc2lvbiBhbmQgZWxpdGUgc2tpbGwgYXJlIGZyZWUsIGJhcmJzIGlzIG9wdGlvbmFsY
 OgNDwcjvOkk6hWEqtp9H0iaBpPkpBUPbTkiqwmpI900mpIDLbipIvSvmpIDrzmpINBAAADAAgAAMNyAt
 IEUvTW8K<
-PWND;
+```
 
+```php
 $team = (new PwndTemplate)->decode($pwnd);
+```
+
+```js
+let team = new PwndTemplate().decode(pwnd);
 ```
 
 ```
@@ -271,124 +301,8 @@ Array
             [player] => Player
             [description] => 1 - WotA
         )
-    [1] => Array
-        (
-            [skills] => OAOj4wiM5MXTMm3cZS9dJOu5B
-            [equipment] => PkppFFEqtEAFEqncAFEaqmAFEaY7/EEaYRIHeqXjE
-            [weaponsets] => Array
-                (
-                    [0] =>
-                    [1] =>
-                    [2] =>
-                )
-            [player] => Xandra
-            [description] => 2 - SoS/Smite
-        )
-    [2] => Array
-        (
-            [skills] => OQNEApwT2zQDmemuhQOIDQEQj
-            [equipment] => Pgp5PCicJCDBR6JzigItw4SQkhtDIIyMgJHeqXjE
-            [weaponsets] => Array
-                (
-                    [0] => PgpghmZ9phOzriU
-                    [1] =>
-                    [2] =>
-                )
-            [player] => Gwen
-            [description] => 3 - Panix
-        )
-    [3] => Array
-        (
-            [skills] => OQNDAcw9QvAIg5ZjOkAcQOBoR
-            [equipment] => PgpZQCikJCXBR6JnrgItw0VQkht3KIywCKHeqXjE
-            [weaponsets] => Array
-                (
-                    [0] => PkpwRNz6TjdMvKSB
-                    [1] =>
-                    [2] =>
-                )
-            [player] => Norgu
-            [description] => 4 - Inep1
-        )
-    [4] => Array
-        (
-            [skills] => OQNDAawDSvAIg5ZrAFgZAEBoR
-            [equipment] => PgpZQCikJCXBR6JnrgItw0VQkht3KIywCKHeqXjE
-            [weaponsets] => Array
-                (
-                    [0] => PkpwRNz6TjdMvKSB
-                    [1] =>
-                    [2] =>
-                )
-            [player] => Razah or [Mercenary]
-            [description] => 5 - Inep2
-        )
-    [5] => Array
-        (
-            [skills] => OAhkQkGZIfMzdwQM0qqSzJnw7iB
-            [equipment] => PgpZRCi8JiYBR6JXsgI7wMWQkhtDLISOALHeqXjE
-            [weaponsets] => Array
-                (
-                    [0] => PkZwUP9akeK
-                    [1] =>
-                    [2] =>
-                )
-            [player] => Livia
-            [description] => 6 - BiP
-        )
-    [6] => Array
-        (
-            [skills] => OAWiQyhMp7INN5I8Y5wJOOZNB
-            [equipment] => PkpxUP96Xfq4npI908npIDLropIvV3npIDr7npITF
-            [weaponsets] => Array
-                (
-                    [0] =>
-                    [1] =>
-                    [2] =>
-                )
-            [player] => Razah or [Mercenary]
-            [description] => 7 - Resto
-        )
-    [7] => Array
-        (
-            [skills] => OAOiAyk8gNtehzWilD56MvY
-            [equipment] => Pkp5EFEKuEAFEqncAFEaqmAFEaY7/EEaYBIHiKbkI
-            [weaponsets] => Array
-                (
-                    [0] => PkZAIP9akeK
-                    [1] =>
-                    [2] =>
-                )
-            [player] => Zei Ri
-            [description] => 8 - ST
-        )
-    [8] => Array
-        (
-            [skills] => OABCY4xEAglAj4ngdQVFAQZA
-            [equipment] => Pgpxlne9rPVaYKSPNvMFJYJRmiEKtATRGW7ipI7A
-            [weaponsets] => Array
-                (
-                    [0] =>
-                    [1] =>
-                    [2] =>
-                )
-            [player] => Olias
-            [description] => 5 - MoP
-secondary profession and elite skill are free, barbs is optional
-        )
-    [9] => Array
-        (
-            [skills] => OgNDwcjvOkk6hWEqtp9H0iaB
-            [equipment] => PkpBUPbTkiqwmpI900mpIDLbipIvSvmpIDrzmpINB
-            [weaponsets] => Array
-                (
-                    [0] =>
-                    [1] =>
-                    [2] =>
-                )
-            [player] => Zhed Shadowhoof
-            [description] => 7 - E/Mo
-        )
+
+    ...more builds...
 )
 ```
 
