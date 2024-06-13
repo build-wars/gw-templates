@@ -19,6 +19,7 @@ use function decbin;
 use function implode;
 use function ord;
 use function pow;
+use function preg_match;
 use function sodium_base642bin;
 use function sodium_bin2base64;
 use function sprintf;
@@ -26,6 +27,7 @@ use function str_pad;
 use function str_replace;
 use function str_split;
 use function strlen;
+use function strpos;
 use function strrev;
 use function substr;
 use function trim;
@@ -40,6 +42,8 @@ abstract class TemplateAbstract{
 	final protected const TEMPLATE_SKILL_NEW     = 0b1110;
 	final protected const TEMPLATE_EQUIPMENT_OLD = 0b0001;
 	final protected const TEMPLATE_EQUIPMENT_NEW = 0b1111;
+
+	final protected const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 	/**
 	 * Reverses the given binary number string and converts it to an integer
@@ -64,6 +68,45 @@ abstract class TemplateAbstract{
 	}
 
 	/**
+	 * Returns the ordinal for the given base64 character
+	 */
+	protected function base64_ord(string $chr):int{
+		/** @phan-suppress-next-line PhanParamSuspiciousOrder */
+		$ord = strpos(self::BASE64, $chr);
+
+		if($ord === false){
+			throw new InvalidArgumentException(sprintf('invalid character given: "%s"', $chr));
+		}
+
+		return $ord;
+	}
+
+	/**
+	 * Returns the base64 character for the given ordinal
+	 */
+	protected function base64_chr(int $ord):string{
+
+		if(!isset(self::BASE64[$ord])){
+			throw new InvalidArgumentException(sprintf('invalid ordinal given: "%s"', $ord));
+		}
+
+		return self::BASE64[$ord];
+	}
+
+	/**
+	 * Checks if the given string is a valid base64 string
+	 */
+	protected function checkCharacterSet(string $base64):string{
+		$base64 = str_replace('=', '', $base64);
+
+		if(!preg_match('/^[A-Za-z0-9+\/]*$/', $base64)){
+			throw new InvalidArgumentException('Base64 must match RFC3548 character set');
+		}
+
+		return $base64;
+	}
+
+	/**
 	 * Determines the minimum pad size
 	 */
 	protected function getPadSize(array $nums, int $min_pad):int{
@@ -85,8 +128,8 @@ abstract class TemplateAbstract{
 	 * @throws \UnhandledMatchError
 	 */
 	protected function decodeTemplate(string $template):string{
-		// nasty fix for urlencode
-		$template = str_replace(' ', '+', trim($template));
+		// nasty fix for urlencode and padded strings
+		$template = str_replace([' ', '='], ['+', ''], trim($template));
 
 		if($template === ''){
 			throw new InvalidArgumentException('invalid base64 template');

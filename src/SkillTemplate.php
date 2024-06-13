@@ -11,14 +11,13 @@ declare(strict_types=1);
 
 namespace BuildWars\GWTemplates;
 
-use RuntimeException;
 use function array_fill;
 use function array_keys;
+use function array_map;
 use function intval;
 use function is_numeric;
 use function max;
 use function min;
-use function preg_match;
 use function substr;
 
 /**
@@ -32,7 +31,6 @@ final class SkillTemplate extends TemplateAbstract{
 	 * @var int[]
 	 */
 	public const PROF_TO_PRI = [
-		0  => -1,
 		1  => 17,
 		2  => 23,
 		3  => 16,
@@ -108,66 +106,39 @@ final class SkillTemplate extends TemplateAbstract{
 	 *
 	 */
 	public function decode(string $template):array{
-		$bin = $this->decodeTemplate($template);
+		$bin    = $this->decodeTemplate($template);
+		$offset = 0;
 
-		// try to read the profession and attribute info
-		// (pl, profession length code, seems to be unused yet and will always be 00)
-		if(!preg_match('/^(?P<pl>[01]{2})(?P<pri>[01]{4})(?P<sec>[01]{4})(?P<attrc>[01]{4})(?P<attrl>[01]{4})/', $bin, $data)){
-			throw new RuntimeException('invalid skill template');
-		}
+		$read = function(int $length) use ($bin, &$offset):int{
+			$dec     = $this->bindec_flip(substr($bin, $offset, $length));
+			$offset += $length;
 
-		// cut 2+4+4+4+4 bits just matched
-		$bin = substr($bin, 18);
+			return $dec;
+		};
 
-		// get the attributes
-		$attributeCount  = $this->bindec_flip($data['attrc']);
-		$attributeLength = ($this->bindec_flip($data['attrl']) + 4);
+		// profession length code, seems to be unused and will always be 00
+		$pl    = $read(2);
+		// primary profession id
+		$pri   = $read(4);
+		// secondary profession id
+		$sec   = $read(4);
+		// attribute count
+		$attrc = $read(4);
+		// attribute id length code
+		$attrl = ($read(4) + 4);
 
 		$attributes = [];
 
-		for($i = 0; $i < $attributeCount; $i++){
-
-			if(!preg_match('/^(?P<id>[01]{'.$attributeLength.'})(?P<val>[01]{4})/', $bin, $attribute)){
-				throw new RuntimeException('invalid attributes');
-			}
-
-			// cut the current attribute's bits
-			$bin = substr($bin, ($attributeLength + 4));
-
-			$attributes[$this->bindec_flip($attribute['id'])] = $this->bindec_flip($attribute['val']);
+		// get the attributes
+		for($i = 0; $i < $attrc; $i++){
+			$attributes[$read($attrl)] = $read(4);
 		}
 
 		// get the skillbar
-		if(!preg_match('/^(?P<length>[01]{4})/', $bin, $skill)){
-			throw new RuntimeException('invalid skill length bits');
-		}
+		$skill_id_len = ($read(4) + 8);
+		$skills       = array_map(fn(int $i):int => $read($skill_id_len), array_fill(0, 8, 0));
 
-		// cut skill length bits
-		$bin = substr($bin, 4);
-
-		$skillLength = ($this->bindec_flip($skill['length']) + 8);
-
-		$skills = [];
-
-		for($i = 0; $i < 8; $i++){
-
-			if(!preg_match('/^(?P<id>[01]{'.$skillLength.'})/', $bin, $skill)){
-				throw new RuntimeException('invalid skill id');
-			}
-
-			// cut current skill's bits
-			$bin = substr($bin, $skillLength);
-
-			$skills[$i] = $this->bindec_flip($skill['id']);
-		}
-
-		return [
-			'code'       => $template,
-			'prof_pri'   => $this->bindec_flip($data['pri']),
-			'prof_sec'   => $this->bindec_flip($data['sec']),
-			'attributes' => $attributes,
-			'skills'     => $skills,
-		];
+		return ['code' => $template, 'prof_pri' => $pri, 'prof_sec' => $sec, 'attributes' => $attributes, 'skills' => $skills];
 	}
 
 	/**
@@ -178,8 +149,8 @@ final class SkillTemplate extends TemplateAbstract{
 	 */
 	public function encode(int $prof_pri, int $prof_sec, array $attributes, array $skills):string{
 		[$prof_pri, $prof_sec] = $this->normalizeProfessions($prof_pri, $prof_sec);
-		$attributes  = $this->normalizeAttributes($attributes, $prof_pri, $prof_sec);
-		$skills      = $this->neormalizeSkills($skills);
+		$attributes            = $this->normalizeAttributes($attributes, $prof_pri, $prof_sec);
+		$skills                = $this->normalizeSkills($skills);
 
 		// start of the binary string:
 		// type (14,4)
@@ -193,7 +164,7 @@ final class SkillTemplate extends TemplateAbstract{
 		$bin .= $this->decbin_pad($prof_sec, 4);
 		// add attribute count
 		$bin .= $this->decbin_pad(count($attributes), 4);
-
+		// get attribute pad size
 		$attr_pad = $this->getPadSize(array_keys($attributes), 5);
 
 		// add attribute length code
@@ -205,11 +176,10 @@ final class SkillTemplate extends TemplateAbstract{
 			$bin .= $this->decbin_pad($level, 4);
 		}
 
-		$skill_pad = $this->getPadSize($skills, 9);
-
+		// get skill pad size
+		$skill_pad = $this->getPadSize($skills, 10);
 		// add skill length code
 		$bin .= $this->decbin_pad(($skill_pad - 8), 4);
-
 		// add skill ids
 		foreach($skills as $id){
 			$bin .= $this->decbin_pad($id, $skill_pad);
@@ -228,7 +198,7 @@ final class SkillTemplate extends TemplateAbstract{
 			$pri = 0;
 		}
 
-		// invalid secondarc profession or secondary profession is same as primary
+		// invalid secondary profession or secondary profession is same as primary
 		if(!isset(self::PROF_TO_PRI[$sec]) || $sec === $pri){
 			$sec = 0;
 		}
@@ -259,7 +229,7 @@ final class SkillTemplate extends TemplateAbstract{
 			}
 
 			// primary attribute of secondary profession
-			if($profession === self::PROF_TO_PRI[$sec]){
+			if(isset(self::PROF_TO_PRI[$sec]) && $profession === self::PROF_TO_PRI[$sec]){
 				continue;
 			}
 
@@ -275,7 +245,7 @@ final class SkillTemplate extends TemplateAbstract{
 	 *
 	 * @link https://wiki.guildwars.com/wiki/Guild_Wars_Wiki:Game_integration/Skills
 	 */
-	private function neormalizeSkills(array $skills):array{
+	private function normalizeSkills(array $skills):array{
 		$normalizedSkills = array_fill(0, 8, 0);
 
 		$i = 0;

@@ -12,11 +12,11 @@ declare(strict_types=1);
 namespace BuildWars\GWTemplates;
 
 use InvalidArgumentException;
-use RuntimeException;
+use function array_fill;
+use function array_map;
 use function array_merge;
 use function is_int;
 use function ksort;
-use function preg_match;
 use function substr;
 use const SORT_NUMERIC;
 
@@ -407,50 +407,33 @@ final class EquipmentTemplate extends TemplateAbstract{
 	 *
 	 */
 	public function decode(string $template):array{
-		$bin = $this->decodeTemplate($template);
-
-		// get item length code, mod length code and item count
-		if(!preg_match('/^(?P<iteml>[01]{4})(?P<modl>[01]{4})(?P<itemc>[01]{3})/', $bin, $info)){
-			throw new RuntimeException('invalid equipment template');
-		}
-
-		// cut 4+4+3 bits
-		$bin = substr($bin, 11);
-
-		$item_count  = $this->bindec_flip($info['itemc']);
-		$item_length = $this->bindec_flip($info['iteml']);
-		$mod_length  = $this->bindec_flip($info['modl']);
-
 		$this->items = [];
+
+		$bin    = $this->decodeTemplate($template);
+		$offset = 0;
+
+		$read = function(int $length) use ($bin, &$offset):int{
+			$dec     = $this->bindec_flip(substr($bin, $offset, $length));
+			$offset += $length;
+
+			return $dec;
+		};
+
+		// get item id length code, mod id length code and item count
+		$item_id_length = $read(4);
+		$mod_id_length  = $read(4);
+		$item_count     = $read(3);
 
 		// loop through the items
 		for($i = 0; $i < $item_count; $i++){
-
 			// get item type, id, number of mods and item color
-			if(!preg_match('/^(?P<slot>[01]{3})(?P<id>[01]{'.$item_length.'})(?P<modc>[01]{2})(?P<color>[01]{4})/', $bin, $data)){
-				throw new RuntimeException('invalid equipment item');
-			}
+			$slot      = $read(3);
+			$id        = $read($item_id_length);
+			$mod_count = $read(2);
+			$color     = $read(4);
+			$mods      = array_map(fn(int $i):int => $read($mod_id_length), array_fill(0, $mod_count, 0));
 
-			$bin = substr($bin, ($item_length + 9));
-
-			// 0. Weapon, 1. Off-hand, 2. Chest, 3. Legs, 4. Head, 5. Feet, 6. Hands
-			$slot = $this->bindec_flip($data['slot']);
-
-			$this->items[$slot] = [
-				'id'    => $this->bindec_flip($data['id']),
-				'slot'  => $slot,
-				'color' => $this->bindec_flip($data['color']),
-				'mods'  => [],
-			];
-
-			// loop through the mods
-			$mod_count = $this->bindec_flip($data['modc']);
-
-			for($j = 0; $j < $mod_count; $j++){
-				$this->items[$slot]['mods'][] = $this->bindec_flip(substr($bin, 0, $mod_length));
-				$bin                          = substr($bin, $mod_length);
-			}
-
+			$this->items[$slot] = ['id' => $id, 'slot' => $slot, 'color' => $color, 'mods' => $mods];
 		}
 
 		ksort($this->items, SORT_NUMERIC);
@@ -466,7 +449,7 @@ final class EquipmentTemplate extends TemplateAbstract{
 
 		// start of the binary string:
 		// type (15,4)
-		$bin  = $this->decbin_pad(dec: self::TEMPLATE_EQUIPMENT_NEW, padding: 4);
+		$bin  = $this->decbin_pad(self::TEMPLATE_EQUIPMENT_NEW, 4);
 		// version (0,4)
 		$bin .= $this->decbin_pad(0, 4);
 
@@ -478,14 +461,13 @@ final class EquipmentTemplate extends TemplateAbstract{
 			$modIDs    = array_merge($modIDs, $item['mods']);
 		}
 
-		$item_count  = count($this->items);
 		$item_length = $this->getPadSize($itemIDs, 8);
 		$mod_length  = $this->getPadSize($modIDs, 8);
 
 		// add length codes and item count
 		$bin .= $this->decbin_pad($item_length, 4);
 		$bin .= $this->decbin_pad($mod_length, 4);
-		$bin .= $this->decbin_pad($item_count, 3);
+		$bin .= $this->decbin_pad(count($this->items), 3);
 
 		// add items
 		foreach($this->items as $item){

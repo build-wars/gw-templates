@@ -32,44 +32,34 @@ export default class EquipmentTemplate extends TemplateAbstract{
 	 * @returns {*}
 	 */
 	decode($template){
-		let bin = this.decodeTemplate($template);
-
 		this.items = {};
 
-		// get item length code, mod length code and item count
-		let item_length = this.bindec_flip(bin.substring(0, 4));
-		let mod_length  = this.bindec_flip(bin.substring(4, 8));
-		let item_count  = this.bindec_flip(bin.substring(8, 11));
+		let bin    = this.decodeTemplate($template);
+		let offset = 0;
 
-		// cut 4+4+3 bits
-		bin = bin.substring(11);
+		let read = ($length) => this.bindec_flip(bin.substring(offset, (offset += $length)));
+
+		// get item id length code, mod id length code and item count
+		let item_id_length = read(4);
+		let mod_id_length  = read(4);
+		let item_count     = read(3);
 
 		// loop through the items
 		for(let i = 0; i < item_count; i++){
 			// get item type, id, number of mods and item color
-
-			// 0. Weapon, 1. Off-hand, 2. Chest, 3. Legs, 4. Head, 5. Feet, 6. Hands
-
-			let slot      = this.bindec_flip(bin.substring(0, 3));
-			let mod_count = this.bindec_flip(bin.substring((item_length + 3), (item_length + 5)));
-
-			this.items[slot] = {
-				id   : this.bindec_flip(bin.substring(3, (item_length + 3))),
-				slot : slot,
-				color: this.bindec_flip(bin.substring((item_length + 5), (item_length + 9))),
-				mods : [],
-			};
-
-			// cut item length + 9 bits
-			bin = bin.substring(item_length + 9);
+			let slot      = read(3);
+			let id        = read(item_id_length);
+			let mod_count = read(2);
+			let color     = read(4);
 
 			// loop through the mods
-			for(let j = 0; j < mod_count; j++){
-				this.items[slot].mods.push(this.bindec_flip(bin.substring(0, mod_length)));
+			let mods = [];
 
-				bin = bin.substring(mod_length);
+			for(let j = 0; j < mod_count; j++){
+				mods.push(read(mod_id_length));
 			}
 
+			this.items[slot] = {id: id, slot: slot, color: color, mods: mods};
 		}
 
 		return this.items;

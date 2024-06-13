@@ -43,32 +43,32 @@ export default class PwndTemplate extends TemplateAbstract{
 		let builds = [];
 		let offset = 0;
 
+		let read = ($length) => b64.substring(offset, (offset += $length));
+
 		while(offset < b64.length){
-			let build = {skills: '', equipment: '', weaponsets: [], player: '', description: '', flags: ''};
-			let length;
 
-			length = this.base64_ord(b64.substring(offset, (offset += 1)));
-			build.skills = b64.substring(offset, (offset += length));
-
-			length = this.base64_ord(b64.substring(offset, (offset += 1)));
-			build.equipment = b64.substring(offset, (offset += length));
+			let build = {
+				skills     : read(this.base64_ord(read(1))),
+				equipment  : read(this.base64_ord(read(1))),
+				weaponsets : ['', '', ''],
+				player     : '',
+				description: '',
+				flags      : '',
+			};
 
 			for(let i = 0; i < 3; i++){
-				length = this.base64_ord(b64.substring(offset, (offset += 1)));
-				build.weaponsets[i] = b64.substring(offset, (offset += length));
+				build.weaponsets[i] = read(this.base64_ord(read(1)));
 			}
 
-			length = this.base64_ord(b64.substring(offset, (offset += 1)));
 			// nobody knows what the flags are or how they're encoded, so we may as well ignore them
 			// (i think it's additional skill points in the UI)
-			build.flags = b64.substring(offset, (offset += length));
+			build.flags  = read(this.base64_ord(read(1)));
+			build.player = atob(read(this.base64_ord(read(1))));
 
-			length = this.base64_ord(b64.substring(offset, (offset += 1)));
-			build.player = atob(b64.substring(offset, (offset += length)));
+			let length  = this.base64_ord(read(1)) * 64;
+			length     += this.base64_ord(read(1));
 
-			length  = this.base64_ord(b64.substring(offset, (offset += 1))) * 64;
-			length += this.base64_ord(b64.substring(offset, (offset += 1)));
-			build.description = atob(b64.substring(offset, (offset += length)));
+			build.description = atob(read(length));
 
 			builds.push(build);
 		}
@@ -82,25 +82,19 @@ export default class PwndTemplate extends TemplateAbstract{
 	 * @returns {string}
 	 */
 	encode(){
-		let pwnd = '';
+		let write = ($str) => (this.base64_chr($str.length) + $str);
+		let pwnd  = '';
 
 		for(let build of this.builds){
-			pwnd += this.base64_chr(build.skills.length);
-			pwnd += build.skills;
-
-			pwnd += this.base64_chr(build.equipment.length);
-			pwnd += build.equipment;
+			pwnd += write(build.skills);
+			pwnd += write(build.equipment);
 
 			for(let weaponset of build.weaponsets){
-				pwnd += this.base64_chr(weaponset.length);
-				pwnd += weaponset;
+				pwnd += write(weaponset);
 			}
 
-			pwnd += this.base64_chr(0); // we're setting the flags to zero-length
-//			pwnd += ''; // noop
-
-			pwnd += this.base64_chr(build.player.length);
-			pwnd += build.player;
+			pwnd += write(''); // we're setting the flags to zero-length
+			pwnd += write(build.player);
 
 			pwnd += this.base64_chr(Math.floor(build.description.length / 64));
 			pwnd += this.base64_chr(build.description.length % 64);

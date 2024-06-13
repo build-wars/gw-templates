@@ -31,53 +31,34 @@ export default class SkillTemplate extends TemplateAbstract{
 	 * @returns {*}
 	 */
 	decode($template){
-		let bin = this.decodeTemplate($template);
+		let bin    = this.decodeTemplate($template);
+		let offset = 0;
 
-		// profession length code (unused, always 0)
-//		let pl    = this.bindec_flip(bin.substring(0, 2));
-		// primary profession
-		let pri   = this.bindec_flip(bin.substring(2, 6));
-		// secondary profession
-		let sec   = this.bindec_flip(bin.substring(6, 10));
+		let read = ($length) => this.bindec_flip(bin.substring(offset, (offset += $length)));
+
+		// profession length code, seems to be unused and will always be 00
+		let pl    = read(2);
+		// primary profession id
+		let pri   = read(4);
+		// secondary profession id
+		let sec   = read(4);
 		// attribute count
-		let attrc = this.bindec_flip(bin.substring(10, 14));
-		// attribute length code
-		let attrl = (this.bindec_flip(bin.substring(14, 18)) + 4);
-		// cut 2+4+4+4+4 bits from before
-		bin       = bin.substring(18);
+		let attrc = read(4);
+		// attribute id length code
+		let attrl = (read(4) + 4);
 
-		let build = {
-			code      : $template,
-			prof_pri  : pri,
-			prof_sec  : sec,
-			attributes: {},
-			skills    : [],
-		};
+		let attributes = {};
 
 		// get the attributes
-
 		for(let i = 0; i < attrc; i++){
-			let id  = bin.substring(0, attrl);
-			let val = bin.substring(attrl, (attrl + 4));
-			// cut the current attribute's bits
-			bin     = bin.substring(attrl + 4);
-
-			build.attributes[this.bindec_flip(id)] = this.bindec_flip(val);
+			attributes[read(attrl)] = read(4);
 		}
 
 		// get the skillbar
+		let skill_id_len = (read(4) + 8);
+		let skills       = [0, 0, 0, 0, 0, 0, 0, 0].map(() => read(skill_id_len));
 
-		let len = (this.bindec_flip(bin.substring(0, 4)) + 8);
-		// cut skill length bits
-		bin     = bin.substring(4);
-
-		for(let i = 0; i < 8; i++){
-			build.skills[i] = this.bindec_flip(bin.substring(0, len));
-			// cut current skill's bits
-			bin = bin.substring(len);
-		}
-
-		return build;
+		return {code: $template, prof_pri: pri, prof_sec: sec, attributes: attributes, skills: skills};
 	}
 
 	/**
