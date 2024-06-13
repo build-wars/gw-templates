@@ -110,6 +110,8 @@ jobs:
   build-js:
     name: "Build (Javascript)"
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: "checkout sources"
