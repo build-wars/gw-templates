@@ -11,23 +11,12 @@ export default {
 		{
 			file     : 'dist/gw-templates-es6.js',
 			format   : 'es',
-			sourcemap: false,
-		},
-		{
-			file     : 'dist/gw-templates-amd.js',
-			format   : 'amd',
-			sourcemap: false,
-		},
-		{
-			file     : 'dist/gw-templates-iife.js',
-			format   : 'iife',
-			sourcemap: false,
-			name     : 'gwtemplates',
+			sourcemap: true,
 		},
 		{
 			file     : 'dist/gw-templates-node.cjs',
 			format   : 'cjs',
-			sourcemap: false,
+			sourcemap: true,
 		},
 	],
 	plugins: [
@@ -47,7 +36,7 @@ export default {
 					+ ' * buildwars/gw-templates\n'
 					+ ' * @copyright  2024 smiley\n'
 					+ ' * @license    MIT\n'
-					+ ' * @link       https://github.com/build-wars/gw-skilldata\n'
+					+ ' * @link       https://github.com/build-wars/gw-templates\n'
 					+ ' */',
 			},
 		}),
