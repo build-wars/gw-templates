@@ -7,12 +7,12 @@ export default {
 	input  : 'es6/index.js',
 	output : [
 		{
-			file     : 'dist/gw-skilldata-es6-src.js',
+			file     : 'dist/gw-templates-es6-src.js',
 			format   : 'es',
 			sourcemap: true,
 		},
 		{
-			file     : 'dist/gw-skilldata-node-src.cjs',
+			file     : 'dist/gw-templates-node-src.cjs',
 			format   : 'cjs',
 			sourcemap: true,
 		},
