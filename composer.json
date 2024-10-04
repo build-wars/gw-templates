@@ -1,4 +1,5 @@
 {
+	"$schema": "https://getcomposer.org/schema.json",
 	"name": "buildwars/gw-templates",
 	"description": "A Guild Wars build template encoder/decoder.",
 	"license": "MIT",
