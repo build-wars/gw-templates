@@ -13,13 +13,10 @@ namespace BuildWars\GWTemplates;
 
 use InvalidArgumentException;
 use Throwable;
-use function array_fill;
 use function array_unshift;
 use function implode;
 use function intdiv;
 use function is_string;
-use function sodium_base642bin;
-use function sodium_bin2base64;
 use function str_replace;
 use function str_split;
 use function str_starts_with;
@@ -28,7 +25,6 @@ use function strpos;
 use function strrpos;
 use function substr;
 use function trim;
-use const SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING;
 
 /**
  * Encodes and decodes paw·ned² team build templates
@@ -42,22 +38,28 @@ final class PwndTemplate extends TemplateAbstract{
 	private const PWND_PREFIX = 'pwnd0001';
 	private const PWND_HEADER = 'pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates';
 
+	/**
+	 * @var array{skills: string, equipment:string, weaponsets: string[], player: string, description: string}[]
+	 */
 	private array $builds = [];
 
 	/**
 	 * Decodes the given paw-ned² template into an array
+	 *
+	 * @return array{skills: string, equipment:string, weaponsets: string[], player: string, description: string, flags: string}[]
 	 */
 	public function decode(string $pwnd):array{
 		$pwnd  = str_replace(["\r", "\n"], '', trim($pwnd));
 		$start = strrpos($pwnd, '>');
-		$end   = strpos($pwnd, '<', $start) - 1;
+		$_end  = strpos($pwnd, '<', $start);
+		$end   = ($_end - 1);
 
-		if($end <= $start || !str_starts_with($pwnd, 'pwnd000')){
-			throw new InvalidArgumentException('invalid pwnd template');
+		if(!str_starts_with($pwnd, 'pwnd000') || $start === false || $_end === false || $end <= $start){
+			throw new InvalidArgumentException('invalid paw-ned² template');
 		}
 
 #		$header = substr($pwnd, 0, $start);
-		$b64    = str_replace(' ', '+', substr($pwnd, $start + 1, $end - $start));
+		$b64    = str_replace(' ', '+', substr($pwnd, ($start + 1), ($end - $start)));
 		$total  = strlen($b64);
 		$builds = [];
 		$offset = 0;
@@ -85,14 +87,15 @@ final class PwndTemplate extends TemplateAbstract{
 			}
 
 			// nobody knows what the flags are or how they're encoded, so we may as well ignore them
-			// (i think it's additional skill points in the UI)
+			// (i think it's additional skill points and pcons in the UI)
 			$build['flags']  = $read($this->base64_ord($read(1)));
-			$build['player'] = sodium_base642bin($read($this->base64_ord($read(1))), SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING);
+			$player_length   = $this->base64_ord($read(1));
+			$build['player'] = $this->base64decode($read($player_length));
 
-			$length  = $this->base64_ord($read(1)) * 64;
-			$length += $this->base64_ord($read(1));
+			$desc_length  = ($this->base64_ord($read(1)) * 64);
+			$desc_length += $this->base64_ord($read(1));
 
-			$build['description'] = sodium_base642bin($read($length), SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING);
+			$build['description'] = $this->base64decode($read($desc_length));
 
 			$builds[] = $build;
 		}
@@ -101,7 +104,7 @@ final class PwndTemplate extends TemplateAbstract{
 	}
 
 	/**
-	 * Encodes the given build(s) into a pwnd template
+	 * Encodes the given build(s) into a paw-ned² template
 	 */
 	public function encode():string{
 		$write = fn(string $str):string => $this->base64_chr(strlen($str)).$str;
@@ -145,10 +148,10 @@ final class PwndTemplate extends TemplateAbstract{
 
 		$this->builds[] = [
 			'skills'      => $this->checkCharacterSet($skills),
-			'equipment'   => $this->checkCharacterSet($equipment ?? ''),
+			'equipment'   => $this->checkCharacterSet(($equipment ?? '')),
 			'weaponsets'  => $this->normalizeWeaponsets($weaponsets),
-			'player'      => sodium_bin2base64(($player ?? ''), SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING),
-			'description' => sodium_bin2base64(($description ?? "\r\n"), SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING),
+			'player'      => $this->base64encode(($player ?? '')),
+			'description' => $this->base64encode(($description ?? "\r\n")),
 		];
 
 		return $this;
@@ -165,9 +168,12 @@ final class PwndTemplate extends TemplateAbstract{
 
 	/**
 	 * Checks/normalizes the given weapon sets, limits input to 3 items
+	 *
+	 * @param  string[] $weaponsets
+	 * @return string[]
 	 */
 	private function normalizeWeaponsets(array $weaponsets):array{
-		$normalizedWeaponsets = array_fill(0, 3, '');
+		$normalizedWeaponsets = ['', '', ''];
 
 		$i = 0;
 
@@ -201,7 +207,6 @@ final class PwndTemplate extends TemplateAbstract{
 
 			$i++;
 		}
-
 
 		return $normalizedWeaponsets;
 	}

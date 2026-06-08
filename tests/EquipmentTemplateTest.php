@@ -7,7 +7,7 @@
  * @copyright    2024 smiley
  * @license      MIT
  */
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace BuildWars\GWTemplatesTest;
 
@@ -21,6 +21,9 @@ use PHPUnit\Framework\TestCase;
  */
 class EquipmentTemplateTest extends TestCase{
 
+	/**
+	 * @return array{0: string, 1: array{id: int, slot: int, color: int, mods: int[]}[]}[]
+	 */
 	public static function equipmentTemplateProvider():array{
 		return [
 			[
@@ -62,6 +65,9 @@ class EquipmentTemplateTest extends TestCase{
 		];
 	}
 
+	/**
+	 * @param array{id: int, slot: int, color: int, mods: int[]}[] $expected
+	 */
 	#[Test]
 	#[DataProvider('equipmentTemplateProvider')]
 	public function decodeEquipment(string $template, array $expected):void{
@@ -70,6 +76,9 @@ class EquipmentTemplateTest extends TestCase{
 		$this::assertSame($expected, $equipment);
 	}
 
+	/**
+	 * @param array{id: int, slot: int, color: int, mods: int[]}[] $expected
+	 */
 	#[Test]
 	#[DataProvider('equipmentTemplateProvider')]
 	public function encodeEquipment(string $template, array $expected):void{

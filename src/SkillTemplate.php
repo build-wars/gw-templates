@@ -11,9 +11,10 @@ declare(strict_types=1);
 
 namespace BuildWars\GWTemplates;
 
-use function array_fill;
+use function array_key_exists;
 use function array_keys;
 use function array_map;
+use function count;
 use function intval;
 use function is_numeric;
 use function max;
@@ -34,8 +35,8 @@ final class SkillTemplate extends TemplateAbstract{
 		1  => 17,
 		2  => 23,
 		3  => 16,
-		4  =>  6,
-		5  =>  0,
+		4  => 6,
+		5  => 0,
 		6  => 12,
 		7  => 35,
 		8  => 36,
@@ -94,16 +95,16 @@ final class SkillTemplate extends TemplateAbstract{
 	];
 
 	/**
+	 * An empty skill bar array
+	 *
+	 * @var int[]
+	 */
+	private const EMPTY_SKILLS = [0, 0, 0, 0, 0, 0, 0, 0];
+
+	/**
 	 * Decodes the given skill template into an array
 	 *
-	 *   array{
-	 *     code:       string,
-	 *     prof_pri:   int,
-	 *     prof_sec:   int,
-	 *     attributes: array<int, int>,
-	 *     skills:     int[]
-	 *   }
-	 *
+	 * @return array{code: string, prof_pri: int, prof_sec: int, attributes: array<int, int>, skills: int[]}
 	 */
 	public function decode(string $template):array{
 		$bin    = $this->decodeTemplate($template);
@@ -117,7 +118,7 @@ final class SkillTemplate extends TemplateAbstract{
 		};
 
 		// profession length code, seems to be unused and will always be 00
-		$pl    = $read(2);
+		$pl    = $read(2); // phpcs:ignore
 		// primary profession id
 		$pri   = $read(4);
 		// secondary profession id
@@ -136,7 +137,7 @@ final class SkillTemplate extends TemplateAbstract{
 
 		// get the skillbar
 		$skill_id_len = ($read(4) + 8);
-		$skills       = array_map(fn(int $i):int => $read($skill_id_len), array_fill(0, 8, 0));
+		$skills       = array_map(fn(int $i):int => $read($skill_id_len), self::EMPTY_SKILLS);
 
 		return ['code' => $template, 'prof_pri' => $pri, 'prof_sec' => $sec, 'attributes' => $attributes, 'skills' => $skills];
 	}
@@ -190,16 +191,18 @@ final class SkillTemplate extends TemplateAbstract{
 
 	/**
 	 * Clamps the given profession IDs
+	 *
+	 * @return int[]
 	 */
 	private function normalizeProfessions(int $pri, int $sec):array{
 
 		// invalid primary profession
-		if(!isset(self::PROF_TO_PRI[$pri])){
+		if(!array_key_exists($pri, self::PROF_TO_PRI)){
 			$pri = 0;
 		}
 
 		// invalid secondary profession or secondary profession is same as primary
-		if(!isset(self::PROF_TO_PRI[$sec]) || $sec === $pri){
+		if(!array_key_exists($sec, self::PROF_TO_PRI) || $sec === $pri){
 			$sec = 0;
 		}
 
@@ -210,6 +213,9 @@ final class SkillTemplate extends TemplateAbstract{
 	 * Clamps the given set of attributes
 	 *
 	 * @link https://wiki.guildwars.com/wiki/Skill_template_format#Attribute_index
+	 *
+	 * @param  array<int, int> $attributes
+	 * @return array<int, int>
 	 */
 	private function normalizeAttributes(array $attributes, int $pri, int $sec):array{
 		$normalizedAttributes = [];
@@ -217,7 +223,7 @@ final class SkillTemplate extends TemplateAbstract{
 		foreach($attributes as $id => $level){
 
 			// exclude invalid attributes
-			if(!isset(self::ATTR_TO_PROF[$id])){
+			if(!array_key_exists($id, self::ATTR_TO_PROF)){
 				continue;
 			}
 
@@ -229,7 +235,7 @@ final class SkillTemplate extends TemplateAbstract{
 			}
 
 			// primary attribute of secondary profession
-			if(isset(self::PROF_TO_PRI[$sec]) && $profession === self::PROF_TO_PRI[$sec]){
+			if(array_key_exists($sec, self::PROF_TO_PRI) && $profession === self::PROF_TO_PRI[$sec]){
 				continue;
 			}
 
@@ -244,9 +250,12 @@ final class SkillTemplate extends TemplateAbstract{
 	 * Clamps the given set of skill IDs
 	 *
 	 * @link https://wiki.guildwars.com/wiki/Guild_Wars_Wiki:Game_integration/Skills
+	 *
+	 * @param  int[] $skills
+	 * @return int[]
 	 */
 	private function normalizeSkills(array $skills):array{
-		$normalizedSkills = array_fill(0, 8, 0);
+		$normalizedSkills = self::EMPTY_SKILLS;
 
 		$i = 0;
 
@@ -264,7 +273,7 @@ final class SkillTemplate extends TemplateAbstract{
 
 			$skill = intval($skill);
 
-			// the highest known skill ID is currently 3431
+			// the highest known (player) skill ID is currently 3431
 			if($skill > 0 && $skill < 0xfff){
 				$normalizedSkills[$i] = $skill;
 			}

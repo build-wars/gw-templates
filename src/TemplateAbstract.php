@@ -99,7 +99,7 @@ abstract class TemplateAbstract{
 	protected function checkCharacterSet(string $base64):string{
 		$base64 = str_replace('=', '', $base64);
 
-		if(!preg_match('/^[A-Za-z0-9+\/]*$/', $base64)){
+		if(!preg_match('/^[A-Za-z0-9\+\/]*$/', $base64)){
 			throw new InvalidArgumentException('Base64 must match RFC3548 character set');
 		}
 
@@ -108,6 +108,8 @@ abstract class TemplateAbstract{
 
 	/**
 	 * Determines the minimum pad size
+	 *
+	 * @param int[] $nums
 	 */
 	protected function getPadSize(array $nums, int $min_pad):int{
 
@@ -118,6 +120,20 @@ abstract class TemplateAbstract{
 		}
 
 		return $min_pad;
+	}
+
+	/**
+	 * @throws \SodiumException
+	 */
+	protected function base64decode(string $base64):string{
+		return sodium_base642bin($base64, SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING);
+	}
+
+	/**
+	 * @throws \SodiumException
+	 */
+	protected function base64encode(string $string):string{
+		return sodium_bin2base64($string, SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING);
 	}
 
 	/**
@@ -135,18 +151,18 @@ abstract class TemplateAbstract{
 			throw new InvalidArgumentException('invalid base64 template');
 		}
 
-		// PHP's base64 decode is a bit picky, so we're gonna add zeroes until the bit count is divisible by 8
+		// PHP's sodium base64 decode is a bit picky, so we're gonna add zeroes until the bit count is divisible by 8
 		// PHPCS:ignore
 		while(((strlen($template) * 6) % 8) !== 0){
 			$template .= 'A';
 		}
 
 		// decode the template and split the 8-bit characters into an array
-		$chars = str_split(sodium_base642bin($template, SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING));
+		$chars = str_split($this->base64decode($template));
 		// convert to 8-bit binary numbers (base convert 10 to 2 with 0 padding to the left)
 		$bin8 = array_map(fn(string $chr):string => sprintf('%08b', ord($chr)), $chars);
 		// now split into chunks of 6 and reverse each block
-		$bin6 = array_map('strrev', str_split(implode('', $bin8), 6));
+		$bin6 = array_map(strrev(...), str_split(implode('', $bin8), 6));
 		// glue it back together
 		$bin = implode('', $bin6);
 
@@ -170,19 +186,18 @@ abstract class TemplateAbstract{
 			throw new InvalidArgumentException('invalid binary template');
 		}
 
-		// fill the string with zeroes until it is divisible by 8
-		// PHPCS:ignore
-		while(strlen($bin) % 8 !== 0){
+		// fill the string with zeroes until it is divisible by 6 and 8
+		while(strlen($bin) % 8 !== 0 || strlen($bin) % 6 !== 0){ // PHPCS:ignore
 			$bin .= '0';
 		}
 
 		// split into chunks of 6 and reverse each block
-		$bin6 = implode('', array_map('strrev', str_split($bin, 6)));
+		$bin6 = implode('', array_map(strrev(...), str_split($bin, 6)));
 		// split into chunks of 8, convert base from 2 to 10 and generate an 8-bit byte character from the result
 		$bin8 = array_map(fn(string $bin):string => chr(bindec($bin)), str_split($bin6, 8));
 
 		// convert to base64
-		return sodium_bin2base64(implode('', $bin8), SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING);
+		return $this->base64encode(implode('', $bin8));
 	}
 
 }

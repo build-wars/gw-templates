@@ -22,10 +22,13 @@ use function array_column;
  */
 class PwndTemplateTest extends TestCase{
 
+	/**
+	 * @return array{0: string, 1: string[], 2: string}[]
+	 */
 	public static function pwndTemplateProvider():array{
 		return [
 			[
-				<<<PWND
+				<<<PWND1
 				pwnd0000?download paw·ned² @ www.gw-tactics.de Copyright numma_cway aka Redeemer
 				>aOwFj0xfzITOMMMHMie4O0k6PxZaPkpxFP9FzSqAA5AAJBAZBApBAJAAACgJIUGxheWVyAMMSAtIFdv
 				dEEKZOAOj4wiM5MXTMm3cZS9dJOu5BpPkppFFEqtEAFEqncAFEaqmAFEaY7/EEaYRIHeqXjEAAACAgIW
@@ -42,7 +45,7 @@ class PwndTemplateTest extends TestCase{
 				vUApzZWNvbmRhcnkgcHJvZmVzc2lvbiBhbmQgZWxpdGUgc2tpbGwgYXJlIGZyZWUsIGJhcmJzIGlzIG9
 				wdGlvbmFsYOgNDwcjvOkk6hWEqtp9H0iaBpPkpBUPbTkiqwmpI900mpIDLbipIvSvmpIDrzmpINBAAAD
 				AAgUWmhlZCBTaGFkb3dob29mAMNyAtIEUvTW8K<
-				PWND,
+				PWND1,
 				[
 					'OwFj0xfzITOMMMHMie4O0k6PxZ',
 					'OAOj4wiM5MXTMm3cZS9dJOu5B',
@@ -70,19 +73,61 @@ class PwndTemplateTest extends TestCase{
 				'QZAoPgpxlne9rPVaYKSPNvMFJYJRmiEKtATRGW7ipI7AAAAAHT2xpYXMBgNSAtIE1vUApzZWNvbmRhcn'."\r\n".
 				'kgcHJvZmVzc2lvbiBhbmQgZWxpdGUgc2tpbGwgYXJlIGZyZWUsIGJhcmJzIGlzIG9wdGlvbmFsYOgNDw'."\r\n".
 				'cjvOkk6hWEqtp9H0iaBpPkpBUPbTkiqwmpI900mpIDLbipIvSvmpIDrzmpINBAAAAUWmhlZCBTaGFkb3'."\r\n".
-				'dob29mAMNyAtIEUvTW8K<'
-			]
+				'dob29mAMNyAtIEUvTW8K<',
+			],
+			[
+				<<<PWND2
+				pwnd0001?download pawned2 @ memorial.redeemer.biz | Copyright 2008-2018 Redeemer
+				>ZOACiQyiMVNxMNAa5YsdN5DWOBpPkpRIPZzXjq4npI908npIDLtopItV3npIDr7npITFAAAGAhA//PA
+				AGU29TCgZOQNEAqwD2yQDmeDhLQOIDQEQjoPgpxkne9rPVYYKSPNuMFZY5PmicJdATRmBzipItAAAACI
+				hAAIUGFuaXgKZOQNDAcw9QvAIg5ZrAkAcQOBoRoPgpBlne9rPVYYKSPNuMFZYZQmikJdATRmBzipItAA
+				AABMAATSW5lcC9FcGlkZW1pYwobOQNEAawD2C9CgAmntCUAmBQEgGBoPgpBlne9rPVYYKSPNuMFZYZQm
+				ikJdATRmBzipItAAAACMBAAPSW5lcC9JbnNwaQocOAhkUwG4hEqUMzXgC4Wodg00kTVFoPgphlne9rPV
+				EbKSPNjNFZYZRmusGdYTRGWXspI7AAAACEIAAWRGlzY29yZC9SZXN0byAxCgcOAhkUwG4hEqUMzXgC4W
+				owj00kTVFoPgphlne9rPVEbKSPNjNFZYZRmusGdYTRGWXspI7AAAACEIAAWRGlzY29yZC9SZXN0byAyC
+				gcOAhkQoGYIfI0dwQjdAnowj00kTVFoPgpRlnsxSPVEbiWPNjNRbY5QmolGdYT0yBXsJa7AAAACYJAAO
+				QmlQL1Jlc3RvCgXOAOiAyk8gNtehTLXLB56MvYpPkpxHPZzXto4npI908npIDLnopIxV3npIDr7npITF
+				AAACgCAALU1QgUHJvdAo<
+				PWND2,
+				[
+					'OACiQyiMVNxMNAa5YsdN5DWOB',
+					'OQNEAqwD2yQDmeDhLQOIDQEQj',
+					'OQNDAcw9QvAIg5ZrAkAcQOBoR',
+					'OQNEAawD2C9CgAmntCUAmBQEgGB',
+					'OAhkUwG4hEqUMzXgC4Wodg00kTVF',
+					'OAhkUwG4hEqUMzXgC4Wowj00kTVF',
+					'OAhkQoGYIfI0dwQjdAnowj00kTVF',
+					'OAOiAyk8gNtehTLXLB56MvY',
+				],
+				'pwnd0001?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates'."\r\n".
+				'>ZOACiQyiMVNxMNAa5YsdN5DWOBpPkpRIPZzXjq4npI908npIDLtopItV3npIDr7npITFAAAAAAGU29T'."\r\n".
+				'CgZOQNEAqwD2yQDmeDhLQOIDQEQjoPgpxkne9rPVYYKSPNuMFZY5PmicJdATRmBzipItAAAAAAAIUGFu'."\r\n".
+				'aXgKZOQNDAcw9QvAIg5ZrAkAcQOBoRoPgpBlne9rPVYYKSPNuMFZYZQmikJdATRmBzipItAAAAAAATSW'."\r\n".
+				'5lcC9FcGlkZW1pYwobOQNEAawD2C9CgAmntCUAmBQEgGBoPgpBlne9rPVYYKSPNuMFZYZQmikJdATRmB'."\r\n".
+				'zipItAAAAAAAPSW5lcC9JbnNwaQocOAhkUwG4hEqUMzXgC4Wodg00kTVFoPgphlne9rPVEbKSPNjNFZY'."\r\n".
+				'ZRmusGdYTRGWXspI7AAAAAAAWRGlzY29yZC9SZXN0byAxCgcOAhkUwG4hEqUMzXgC4Wowj00kTVFoPgp'."\r\n".
+				'hlne9rPVEbKSPNjNFZYZRmusGdYTRGWXspI7AAAAAAAWRGlzY29yZC9SZXN0byAyCgcOAhkQoGYIfI0d'."\r\n".
+				'wQjdAnowj00kTVFoPgpRlnsxSPVEbiWPNjNRbY5QmolGdYT0yBXsJa7AAAAAAAOQmlQL1Jlc3RvCgXOA'."\r\n".
+				'OiAyk8gNtehTLXLB56MvYpPkpxHPZzXto4npI908npIDLnopIxV3npIDr7npITFAAAAAALU1QgUHJvdA'."\r\n".
+				'o<',
+			],
 		];
 	}
 
+	/**
+	 * @param string[] $expected
+	 */
 	#[Test]
 	#[DataProvider('pwndTemplateProvider')]
-	public function decodePwnd(string $pwnd, array $expected):void{
+	public function decodePwnd(string $pwnd, array $expected, string $expectedCode):void{
 		$team = (new PwndTemplate)->decode($pwnd);
 
 		$this::assertSame($expected, array_column($team, 'skills'));
 	}
 
+	/**
+	 * @param string[] $expected
+	 */
 	#[Test]
 	#[DataProvider('pwndTemplateProvider')]
 	public function encodePwnd(string $pwnd, array $expected, string $expectedCode):void{

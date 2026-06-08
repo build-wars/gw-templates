@@ -13,8 +13,10 @@ namespace BuildWars\GWTemplates;
 
 use InvalidArgumentException;
 use function array_fill;
+use function array_key_exists;
 use function array_map;
 use function array_merge;
+use function count;
 use function is_int;
 use function ksort;
 use function substr;
@@ -36,7 +38,7 @@ final class EquipmentTemplate extends TemplateAbstract{
 	 *   5 => Feet
 	 *   6 => Hands
 	 *
-	 * @var int[]
+	 * @var array<int, int>
 	 */
 	public const ITEM_TO_SLOT = [
 		1   => 5,
@@ -379,6 +381,7 @@ final class EquipmentTemplate extends TemplateAbstract{
 
 	/**
 	 * Item colors
+	 *
 	 * @var array<int, string>
 	 */
 	public const ITEM_COLORS = [
@@ -393,18 +396,15 @@ final class EquipmentTemplate extends TemplateAbstract{
 		9 => 'grey',
 	];
 
+	/**
+	 * @var array{id: int, slot: int, color: int, mods: int[]}[]
+	 */
 	private array $items = [];
 
 	/**
 	 * Decodes the given equipment template into an array
 	 *
-	 *    array{
-	 *      id:    int,
-	 *      slot:  int,
-	 *      color: int,
-	 *      mods:  int[]
-	 *    }
-	 *
+	 * @return array{id: int, slot: int, color: int, mods: int[]}[]
 	 */
 	public function decode(string $template):array{
 		$this->items = [];
@@ -487,14 +487,16 @@ final class EquipmentTemplate extends TemplateAbstract{
 
 	/**
 	 * Adds an equipment item
+	 *
+	 * @param int[] $mods
 	 */
 	public function addItem(int $id, int $color = 0, array $mods = []):self{
 
-		if(!isset(self::ITEM_TO_SLOT[$id])){
+		if(!array_key_exists($id, self::ITEM_TO_SLOT)){
 			throw new InvalidArgumentException('invalid item id');
 		}
 
-		if(!isset(self::ITEM_COLORS[$color])){
+		if(!array_key_exists($color, self::ITEM_COLORS)){
 			throw new InvalidArgumentException('invalid color id');
 		}
 
@@ -521,6 +523,9 @@ final class EquipmentTemplate extends TemplateAbstract{
 
 	/**
 	 * Normalizes/clamps mod IDs
+	 *
+	 * @param int[] $mods
+	 * @return int[]
 	 */
 	private function normalizeMods(array $mods):array{
 		$normalizedMods = [];

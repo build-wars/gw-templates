@@ -47,6 +47,10 @@ class SkillTemplateTest extends TestCase{
 		];
 	}
 
+	/**
+	 * @param array<int, int> $attributes
+	 * @param int[]           $skills
+	 */
 	#[Test]
 	#[DataProvider('skillTemplateProvider')]
 	public function decodeSkills(string $template, int $pri, int $sec, array $attributes, array $skills):void{
@@ -57,6 +61,10 @@ class SkillTemplateTest extends TestCase{
 		$this::assertSame($skills, $build['skills']);
 	}
 
+	/**
+	 * @param array<int, int> $attributes
+	 * @param int[]           $skills
+	 */
 	#[Test]
 	#[DataProvider('skillTemplateProvider')]
 	public function encodeSkills(string $template, int $pri, int $sec, array $attributes, array $skills):void{
