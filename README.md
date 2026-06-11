@@ -42,7 +42,7 @@ templates, as well as [paw·ned²](https://memorial.redeemer.biz/pawned2/) team 
 alternatively:
 
 - Javascript
-  - node.js >= 20
+  - node.js >= 24
   - a web browser
 
 # Documentation
@@ -50,14 +50,11 @@ alternatively:
 ## PHP: Installation with [composer](https://getcomposer.org)
 
 ### Terminal
-
 ```
 composer require buildwars/gw-templates
 ```
 
-
 ### composer.json
-
 ```json
 {
 	"require": {
@@ -69,18 +66,14 @@ composer require buildwars/gw-templates
 
 Note: check the [releases](https://github.com/buildwars/gw-templates/releases) for valid versions.
 
-
 ## JS: Installation with [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 
 ### Terminal
-
 ```
 npm install @buildwars/gw-templates
 ```
 
-
 ### package.json
-
 ```json
 {
 	"dependencies": {
@@ -88,8 +81,6 @@ npm install @buildwars/gw-templates
 	}
 }
 ```
-
-
 
 ## Usage
 
@@ -163,7 +154,7 @@ Please note that the codes might not necessarily match between decode/encode.
 ```php
 $equipmentTemplate = new EquipmentTemplate;
 
-// add iems (will overwrite previous items with same slot id)
+// add items (will overwrite previous items with same slot id)
 $equipmentTemplate->addItem(
 	id:    279,
 	color: 0,
