@@ -34,7 +34,7 @@ export default class PwndTemplate extends TemplateAbstract{
 		let start = $pwnd.indexOf('>');
 		let end   = $pwnd.indexOf('<', start);
 
-		if(end <= start || $pwnd.substring(0, 7) !== 'pwnd000'){
+		if($pwnd.substring(0, 7) !== 'pwnd000' || start === -1 || end === -1 || end <= start){
 			throw new Error('invalid pwnd template');
 		}
 
@@ -61,14 +61,15 @@ export default class PwndTemplate extends TemplateAbstract{
 			}
 
 			// nobody knows what the flags are or how they're encoded, so we may as well ignore them
-			// (i think it's additional skill points in the UI)
+			// (i think it's additional skill points and pcons in the UI)
 			build.flags  = read(this.base64_ord(read(1)));
-			build.player = atob(read(this.base64_ord(read(1))));
+			build.player = atob(read(this.base64_ord(read(1)))); // 32 bytes max
 
-			let length  = this.base64_ord(read(1)) * 64;
-			length     += this.base64_ord(read(1));
+			let desc_length  = this.base64_ord(read(1)) * 64;
+			desc_length     += this.base64_ord(read(1));
 
-			build.description = atob(read(length));
+			// the description field is slot name and description glued by a \n, variable length each, a total of 256 bytes
+			build.description = atob(read(desc_length));
 
 			builds.push(build);
 		}
@@ -77,7 +78,7 @@ export default class PwndTemplate extends TemplateAbstract{
 	}
 
 	/**
-	 * Encodes the given build(s) into a pwnd template
+	 * Encodes the given build(s) into a paw-ned² template
 	 *
 	 * @returns {string}
 	 */
@@ -114,16 +115,18 @@ export default class PwndTemplate extends TemplateAbstract{
 	 * @param {string[]} $weaponsets
 	 * @param {string|null} $player
 	 * @param {string|null} $description
+	 * @param {string|null} $slotname
 	 * @returns {PwndTemplate}
 	 */
-	addBuild($skills, $equipment = null, $weaponsets = [], $player = null, $description = null){
+	addBuild($skills, $equipment = null, $weaponsets = [], $player = null, $description = null, $slotname = null){
 
 		this.builds.push({
 			skills     : this.checkCharacterSet($skills),
 			equipment  : this.checkCharacterSet($equipment ?? ''),
 			weaponsets : this.normalizeWeaponsets($weaponsets),
 			player     : this.base64encode($player ?? ''),
-			description: this.base64encode($description ?? '\r\n'),
+			// $slotname."\n".$description
+			description: this.base64encode($description ?? '\n'),
 		});
 
 		return this;

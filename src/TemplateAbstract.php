@@ -24,11 +24,11 @@ use function sodium_base642bin;
 use function sodium_bin2base64;
 use function sprintf;
 use function str_pad;
-use function str_replace;
 use function str_split;
 use function strlen;
 use function strpos;
 use function strrev;
+use function strtr;
 use function substr;
 use function trim;
 use const SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING;
@@ -97,7 +97,12 @@ abstract class TemplateAbstract{
 	 * Checks if the given string is a valid base64 string
 	 */
 	protected function checkCharacterSet(string $base64):string{
-		$base64 = str_replace('=', '', $base64);
+		// nasty fix for urlencode and padded strings
+		$base64 = trim(strtr($base64, [' ' => '+', '=' => '']));
+
+		if($base64 === ''){
+			return '';
+		}
 
 		if(!preg_match('/^[A-Za-z0-9\+\/]*$/', $base64)){
 			throw new InvalidArgumentException('Base64 must match RFC3548 character set');
@@ -144,16 +149,14 @@ abstract class TemplateAbstract{
 	 * @throws \UnhandledMatchError
 	 */
 	protected function decodeTemplate(string $template):string{
-		// nasty fix for urlencode and padded strings
-		$template = str_replace([' ', '='], ['+', ''], trim($template));
+		$template = $this->checkCharacterSet($template);
 
 		if($template === ''){
 			throw new InvalidArgumentException('invalid base64 template');
 		}
 
 		// PHP's sodium base64 decode is a bit picky, so we're gonna add zeroes until the bit count is divisible by 8
-		// PHPCS:ignore
-		while(((strlen($template) * 6) % 8) !== 0){
+		while(((strlen($template) * 6) % 8) !== 0){ // phpcs:ignore
 			$template .= 'A';
 		}
 
@@ -187,7 +190,7 @@ abstract class TemplateAbstract{
 		}
 
 		// fill the string with zeroes until it is divisible by 6 and 8
-		while(strlen($bin) % 8 !== 0 || strlen($bin) % 6 !== 0){ // PHPCS:ignore
+		while(strlen($bin) % 8 !== 0 || strlen($bin) % 6 !== 0){ // phpcs:ignore
 			$bin .= '0';
 		}
 

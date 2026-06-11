@@ -110,7 +110,12 @@ export default class TemplateAbstract{
 	 * @protected
 	 */
 	checkCharacterSet($base64){
-		$base64 = $base64.replace('=', '');
+		// nasty fix for urlencode and padded strings
+		$base64 = $base64.trim().replace(' ', '+').replace('=', '');
+
+		if($base64 === ''){
+			return '';
+		}
 
 		if($base64.match(/^[A-Za-z0-9+\/]*$/) === null){
 			throw new Error('Base64 must match RFC3548 character set');
@@ -127,8 +132,7 @@ export default class TemplateAbstract{
 	 * @protected
 	 */
 	decodeTemplate($template){
-		// nasty fix for urlencode and padded strings
-		$template = $template.trim().replace(' ', '+').replace('=', '');
+		$template = this.checkCharacterSet($template);
 
 		if($template === ''){
 			throw new Error('invalid base64 template');
@@ -165,8 +169,8 @@ export default class TemplateAbstract{
 			throw new Error('invalid binary template');
 		}
 
-		// fill the string with zeroes until it is divisible by 8 (PHP base64_decode compatibility)
-		while($bin.length % 8 !== 0){
+		// fill the string with zeroes until it is divisible by 6 and 8 (PHP base64_decode compatibility)
+		while($bin.length % 8 !== 0 || $bin.length % 6 !== 0){
 			$bin += '0';
 		}
 

@@ -90,11 +90,12 @@ final class PwndTemplate extends TemplateAbstract{
 			// (i think it's additional skill points and pcons in the UI)
 			$build['flags']  = $read($this->base64_ord($read(1)));
 			$player_length   = $this->base64_ord($read(1));
-			$build['player'] = $this->base64decode($read($player_length));
+			$build['player'] = $this->base64decode($read($player_length)); // 32 bytes max
 
 			$desc_length  = ($this->base64_ord($read(1)) * 64);
 			$desc_length += $this->base64_ord($read(1));
 
+			// the description field is slot name and description glued by a \n, variable length each, a total of 256 bytes
 			$build['description'] = $this->base64decode($read($desc_length));
 
 			$builds[] = $build;
@@ -121,8 +122,10 @@ final class PwndTemplate extends TemplateAbstract{
 			$pwnd .= $write(''); // we're setting the flags to zero-length
 			$pwnd .= $write($build['player']);
 
-			$pwnd .= $this->base64_chr(intdiv(strlen($build['description']), 64));
-			$pwnd .= $this->base64_chr(strlen($build['description']) % 64);
+			$desc_length = strlen($build['description']);
+
+			$pwnd .= $this->base64_chr(intdiv($desc_length, 64));
+			$pwnd .= $this->base64_chr($desc_length % 64);
 			$pwnd .= $build['description'];
 		}
 
@@ -144,6 +147,7 @@ final class PwndTemplate extends TemplateAbstract{
 		array       $weaponsets = [],
 		string|null $player = null,
 		string|null $description = null,
+		string|null $slotname = null,
 	):self{
 
 		$this->builds[] = [
@@ -151,7 +155,8 @@ final class PwndTemplate extends TemplateAbstract{
 			'equipment'   => $this->checkCharacterSet(($equipment ?? '')),
 			'weaponsets'  => $this->normalizeWeaponsets($weaponsets),
 			'player'      => $this->base64encode(($player ?? '')),
-			'description' => $this->base64encode(($description ?? "\r\n")),
+			// $slotname."\n".$description
+			'description' => $this->base64encode(($description ?? "\n")),
 		];
 
 		return $this;
