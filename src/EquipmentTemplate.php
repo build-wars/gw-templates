@@ -40,7 +40,7 @@ final class EquipmentTemplate extends TemplateAbstract{
 	 *
 	 * @var array<int, int>
 	 */
-	public const ITEM_TO_SLOT = [
+	private const ITEM_TO_SLOT = [
 		1   => 5,
 		2   => 5,
 		3   => 5,
@@ -384,7 +384,7 @@ final class EquipmentTemplate extends TemplateAbstract{
 	 *
 	 * @var array<int, string>
 	 */
-	public const ITEM_COLORS = [
+	private const ITEM_COLORS = [
 		0 => 'default',
 		2 => 'blue',
 		3 => 'green',

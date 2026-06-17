@@ -31,7 +31,7 @@ final class SkillTemplate extends TemplateAbstract{
 	 *
 	 * @var int[]
 	 */
-	public const PROF_TO_PRI = [
+	private const PROF_TO_PRI = [
 		1  => 17,
 		2  => 23,
 		3  => 16,
@@ -49,7 +49,7 @@ final class SkillTemplate extends TemplateAbstract{
 	 *
 	 * @var int[]
 	 */
-	public const ATTR_TO_PROF = [
+	private const ATTR_TO_PROF = [
 		0  => 5,
 		1  => 5,
 		2  => 5,
