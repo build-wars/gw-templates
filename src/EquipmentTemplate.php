@@ -19,7 +19,6 @@ use function array_merge;
 use function count;
 use function is_int;
 use function ksort;
-use function substr;
 use const SORT_NUMERIC;
 
 /**
@@ -409,29 +408,22 @@ final class EquipmentTemplate extends TemplateAbstract{
 	public function decode(string $template):array{
 		$this->items = [];
 
-		$bin    = $this->decodeTemplate($template);
-		$offset = 0;
-
-		$read = function(int $length) use ($bin, &$offset):int{
-			$dec     = $this->bindec_flip(substr($bin, $offset, $length));
-			$offset += $length;
-
-			return $dec;
-		};
+		$this->string = $this->decodeTemplate($template);
+		$this->offset = 0;
 
 		// get item id length code, mod id length code and item count
-		$item_id_length = $read(4);
-		$mod_id_length  = $read(4);
-		$item_count     = $read(3);
+		$item_id_length = $this->read(4);
+		$mod_id_length  = $this->read(4);
+		$item_count     = $this->read(3);
 
 		// loop through the items
 		for($i = 0; $i < $item_count; $i++){
 			// get item type, id, number of mods and item color
-			$slot      = $read(3);
-			$id        = $read($item_id_length);
-			$mod_count = $read(2);
-			$color     = $read(4);
-			$mods      = array_map(fn(int $i):int => $read($mod_id_length), array_fill(0, $mod_count, 0));
+			$slot      = $this->read(3);
+			$id        = $this->read($item_id_length);
+			$mod_count = $this->read(2);
+			$color     = $this->read(4);
+			$mods      = array_map(fn(int $i):int => $this->read($mod_id_length), array_fill(0, $mod_count, 0));
 
 			$this->items[$slot] = ['id' => $id, 'slot' => $slot, 'color' => $color, 'mods' => $mods];
 		}

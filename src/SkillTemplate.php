@@ -19,7 +19,6 @@ use function intval;
 use function is_numeric;
 use function max;
 use function min;
-use function substr;
 
 /**
  * @link https://wiki.guildwars.com/wiki/Skill_template_format
@@ -107,37 +106,30 @@ final class SkillTemplate extends TemplateAbstract{
 	 * @return array{code: string, prof_pri: int, prof_sec: int, attributes: array<int, int>, skills: int[]}
 	 */
 	public function decode(string $template):array{
-		$bin    = $this->decodeTemplate($template);
-		$offset = 0;
-
-		$read = function(int $length) use ($bin, &$offset):int{
-			$dec     = $this->bindec_flip(substr($bin, $offset, $length));
-			$offset += $length;
-
-			return $dec;
-		};
+		$this->string = $this->decodeTemplate($template);
+		$this->offset = 0;
 
 		// profession length code, seems to be unused and will always be 00
-		$pl    = $read(2); // phpcs:ignore
+		$pl    = $this->read(2); // phpcs:ignore
 		// primary profession id
-		$pri   = $read(4);
+		$pri   = $this->read(4);
 		// secondary profession id
-		$sec   = $read(4);
+		$sec   = $this->read(4);
 		// attribute count
-		$attrc = $read(4);
+		$attrc = $this->read(4);
 		// attribute id length code
-		$attrl = ($read(4) + 4);
+		$attrl = ($this->read(4) + 4);
 
 		$attributes = [];
 
 		// get the attributes
 		for($i = 0; $i < $attrc; $i++){
-			$attributes[$read($attrl)] = $read(4);
+			$attributes[$this->read($attrl)] = $this->read(4);
 		}
 
 		// get the skillbar
-		$skill_id_len = ($read(4) + 8);
-		$skills       = array_map(fn(int $i):int => $read($skill_id_len), self::EMPTY_SKILLS);
+		$skill_id_len = ($this->read(4) + 8);
+		$skills       = array_map(fn(int $i):int => $this->read($skill_id_len), self::EMPTY_SKILLS);
 
 		return ['code' => $template, 'prof_pri' => $pri, 'prof_sec' => $sec, 'attributes' => $attributes, 'skills' => $skills];
 	}

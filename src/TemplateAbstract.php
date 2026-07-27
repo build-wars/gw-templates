@@ -14,10 +14,9 @@ namespace BuildWars\GWTemplates;
 use InvalidArgumentException;
 use function array_map;
 use function bindec;
-use function chr;
 use function decbin;
 use function implode;
-use function ord;
+use function pack;
 use function pow;
 use function preg_match;
 use function sodium_base642bin;
@@ -26,11 +25,11 @@ use function sprintf;
 use function str_pad;
 use function str_split;
 use function strlen;
-use function strpos;
 use function strrev;
 use function strtr;
 use function substr;
 use function trim;
+use function unpack;
 use const SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING;
 
 /**
@@ -43,7 +42,15 @@ abstract class TemplateAbstract{
 	final protected const TEMPLATE_EQUIPMENT_OLD = 0b0001;
 	final protected const TEMPLATE_EQUIPMENT_NEW = 0b1111;
 
-	final protected const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+	protected int    $offset = 0;
+	protected string $string = '';
+
+#	public function __construct(){
+#		// https://stackoverflow.com/a/24785578
+#		if(unpack('S',"\x01\x00")[1] !== 1){
+#			throw new RuntimeException('machine byte order is not little endian');
+#		}
+#	}
 
 	/**
 	 * Reverses the given binary number string and converts it to an integer
@@ -68,32 +75,6 @@ abstract class TemplateAbstract{
 	}
 
 	/**
-	 * Returns the ordinal for the given base64 character
-	 */
-	protected function base64_ord(string $chr):int{
-		/** @phan-suppress-next-line PhanParamSuspiciousOrder */
-		$ord = strpos(self::BASE64, $chr);
-
-		if($ord === false){
-			throw new InvalidArgumentException(sprintf('invalid character given: "%s"', $chr));
-		}
-
-		return $ord;
-	}
-
-	/**
-	 * Returns the base64 character for the given ordinal
-	 */
-	protected function base64_chr(int $ord):string{
-
-		if(!isset(self::BASE64[$ord])){
-			throw new InvalidArgumentException(sprintf('invalid ordinal given: "%s"', $ord));
-		}
-
-		return self::BASE64[$ord];
-	}
-
-	/**
 	 * Checks if the given string is a valid base64 string
 	 */
 	protected function checkCharacterSet(string $base64):string{
@@ -104,6 +85,7 @@ abstract class TemplateAbstract{
 			return '';
 		}
 
+		/** @noinspection RegExpRedundantEscape */
 		if(!preg_match('/^[A-Za-z0-9\+\/]*$/', $base64)){
 			throw new InvalidArgumentException('Base64 must match RFC3548 character set');
 		}
@@ -131,6 +113,13 @@ abstract class TemplateAbstract{
 	 * @throws \SodiumException
 	 */
 	protected function base64decode(string $base64):string{
+		$base64 = $this->checkCharacterSet($base64);
+
+		// PHP's sodium base64 decode is a bit picky, so we're gonna add zeroes until the bit count is divisible by 8
+		while((strlen($base64) % 4) !== 0){ // phpcs:ignore
+			$base64 .= 'A';
+		}
+
 		return sodium_base642bin($base64, SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING);
 	}
 
@@ -142,65 +131,87 @@ abstract class TemplateAbstract{
 	}
 
 	/**
-	 * Decodes a template from the base64 format into a binary number string
+	 * Reads the given amount of bits from the set string
+	 */
+	protected function read(int $length):int{
+		$dec           = $this->bindec_flip(substr($this->string, $this->offset, $length));
+		$this->offset += $length;
+
+		return $dec;
+	}
+
+	/**
+	 * Decodes a template from the base64 format into a binary number (base2) string
 	 *
 	 * @throws \InvalidArgumentException
 	 * @throws \SodiumException
 	 * @throws \UnhandledMatchError
 	 */
-	protected function decodeTemplate(string $template):string{
-		$template = $this->checkCharacterSet($template);
+	protected function decodeTemplate(string $base64):string{
 
-		if($template === ''){
+		if($base64 === ''){
 			throw new InvalidArgumentException('invalid base64 template');
 		}
 
-		// PHP's sodium base64 decode is a bit picky, so we're gonna add zeroes until the bit count is divisible by 8
-		while(((strlen($template) * 6) % 8) !== 0){ // phpcs:ignore
-			$template .= 'A';
-		}
-
-		// decode the template and split the 8-bit characters into an array
-		$chars = str_split($this->base64decode($template));
-		// convert to 8-bit binary numbers (base convert 10 to 2 with 0 padding to the left)
-		$bin8 = array_map(fn(string $chr):string => sprintf('%08b', ord($chr)), $chars);
-		// now split into chunks of 6 and reverse each block
-		$bin6 = array_map(strrev(...), str_split(implode('', $bin8), 6));
-		// glue it back together
-		$bin = implode('', $bin6);
-
+		// decode the template into 8-bit characters (unsigned char)
+		$chars = $this->base64decode($base64);
+		$base2 = $this->decodeBinaryToBase2($chars);
 		// get the first 4 bits and decide what to do
-		return match($this->bindec_flip(substr($bin, 0, 4))){
+		return match($this->bindec_flip(substr($base2, 0, 4))){
 			// new format, remove leading template type and version number
-			self::TEMPLATE_SKILL_NEW, self::TEMPLATE_EQUIPMENT_NEW => substr($bin, 8),
+			self::TEMPLATE_SKILL_NEW, self::TEMPLATE_EQUIPMENT_NEW => substr($base2, 8),
 			// old format prior to April 5, 2007, remove version number
-			self::TEMPLATE_SKILL_OLD, self::TEMPLATE_EQUIPMENT_OLD => substr($bin, 4),
+			self::TEMPLATE_SKILL_OLD, self::TEMPLATE_EQUIPMENT_OLD => substr($base2, 4),
 		};
 	}
 
 	/**
-	 * Encodes a binary number template to base64 format
+	 * Encodes a binary number (base2) template to base64 format
 	 *
 	 * @throws \SodiumException
 	 */
-	protected function encodeTemplate(string $bin):string{
+	protected function encodeTemplate(string $base2):string{
 
-		if($bin === ''){
+		if($base2 === ''){
 			throw new InvalidArgumentException('invalid binary template');
 		}
 
-		// fill the string with zeroes until it is divisible by 6 and 8
-		while(strlen($bin) % 8 !== 0 || strlen($bin) % 6 !== 0){ // phpcs:ignore
-			$bin .= '0';
-		}
-
-		// split into chunks of 6 and reverse each block
-		$bin6 = implode('', array_map(strrev(...), str_split($bin, 6)));
-		// split into chunks of 8, convert base from 2 to 10 and generate an 8-bit byte character from the result
-		$bin8 = array_map(fn(string $bin):string => chr(bindec($bin)), str_split($bin6, 8));
-
+		$bin8 = $this->encodeBase2ToBinary($base2);
 		// convert to base64
-		return $this->base64encode(implode('', $bin8));
+		return $this->base64encode($bin8);
+	}
+
+	/**
+	 * Decodes the given raw 8-bit binary (unsigned char) string from the decoded base64
+	 * into a base2 string suitable for reading the template data.
+	 *
+	 * @see https://wiki.guildwars.com/wiki/Talk:Skill_template_format#I_don't_get_it
+	 */
+	protected function decodeBinaryToBase2(string $chars):string{
+		// unpack the string from unsigned char
+		$uint8 = unpack('C*', $chars);
+		// base convert 10 to 2 (8 bits each value, zero padded to the left)
+		$bin8  = array_map(fn(int $num):string => sprintf('%08b', $num), $uint8);
+		// now split the string into chunks of 6 bits and reverse each chunk
+		$bin6  = array_map(strrev(...), str_split(implode('', $bin8), 6));
+		// glue the string back together and return the result
+		return implode('', $bin6);
+	}
+
+	/**
+	 * Encodes the given base2 template data string into an 8-bit binary string.
+	 */
+	protected function encodeBase2ToBinary(string $base2):string{
+		// fill the string with zeroes until it is divisible by 6 and 8
+		while(strlen($base2) % 8 !== 0 || strlen($base2) % 6 !== 0){ // phpcs:ignore
+			$base2 .= '0';
+		}
+		// split into chunks of 6 and reverse each block
+		$bin6  = implode('', array_map(strrev(...), str_split($base2, 6)));
+		// split the string into chunks of 8 and base convert each chunk from 2 to 10
+		$uint8 = array_map(bindec(...), str_split($bin6, 8));
+		// convert the uint8 into an 8-bit binary string (unsigned char)
+		return pack('C*', ...$uint8);
 	}
 
 }
