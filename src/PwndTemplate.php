@@ -55,7 +55,7 @@ final class PwndTemplate extends TemplateAbstract{
 	public const PAWNED_CHARSET_WINDOWS1252 = 1;
 	public const PAWNED_CHARSET_UTF8        = 2;
 
-	public const ENCODINGS = [
+	public const CHARSETS = [
 		self::PAWNED_CHARSET_UNDEFINED   => 'undefined',
 		self::PAWNED_CHARSET_WINDOWS1252 => 'Windows-1252',
 		self::PAWNED_CHARSET_UTF8        => 'UTF-8',
@@ -183,7 +183,7 @@ final class PwndTemplate extends TemplateAbstract{
 		$headerFlags = array_map(intval(...), str_split(substr($header, 4)));
 
 		if($headerFlags[0] !== 0){
-			throw new RuntimeException('paw-ned² breaking change detected');
+			throw new RuntimeException('paw-ned² breaking change detected'); // @codeCoverageIgnore
 		}
 
 		return $headerFlags;
@@ -197,11 +197,11 @@ final class PwndTemplate extends TemplateAbstract{
 	 */
 	public static function getEncoding(int $encodingFlag):string{
 
-		if(!array_key_exists($encodingFlag, self::ENCODINGS)){
-			throw new InvalidArgumentException('invalid encoding flag');
+		if(!array_key_exists($encodingFlag, self::CHARSETS)){
+			throw new InvalidArgumentException('invalid encoding flag'); // @codeCoverageIgnore
 		}
 
-		return self::ENCODINGS[$encodingFlag];
+		return self::CHARSETS[$encodingFlag];
 	}
 
 	/**
@@ -313,7 +313,7 @@ final class PwndTemplate extends TemplateAbstract{
 	):self{
 
 		if(count($this->builds) >= 12){
-			throw new InvalidArgumentException('maximum 12 builds');
+			throw new InvalidArgumentException('maximum 12 builds'); // @codeCoverageIgnore
 		}
 
 		$this->builds[] = [
@@ -545,14 +545,14 @@ final class PwndTemplate extends TemplateAbstract{
 			$from_encoding = mb_detect_encoding($data, ['Windows-1252', 'UTF-8', 'ASCII'], true);
 
 			if($from_encoding === false){
-				throw new RuntimeException('cannot detect encoding of the given string');
+				throw new RuntimeException('cannot detect encoding of the given string'); // @codeCoverageIgnore
 			}
 		}
 
 		$data = mb_convert_encoding($data, $internal_encoding, $from_encoding);
 
 		if($data === false){
-			throw new RuntimeException(sprintf('error converting from %s', $from_encoding));
+			throw new RuntimeException(sprintf('error converting from %s', $from_encoding)); // @codeCoverageIgnore
 		}
 
 		return trim($data);
@@ -577,7 +577,7 @@ final class PwndTemplate extends TemplateAbstract{
 		$data = mb_convert_encoding($data, $to_encoding, $internal_encoding);
 
 		if($data === false){
-			throw new RuntimeException(sprintf('error converting to %s', $to_encoding));
+			throw new RuntimeException(sprintf('error converting to %s', $to_encoding)); // @codeCoverageIgnore
 		}
 
 		return $data;
@@ -593,7 +593,7 @@ final class PwndTemplate extends TemplateAbstract{
 		$ord = strpos(self::BASE64, $chr);
 
 		if($ord === false){
-			throw new InvalidArgumentException(sprintf('invalid character given: "%s"', $chr));
+			throw new InvalidArgumentException(sprintf('invalid character given: "%s"', $chr)); // @codeCoverageIgnore
 		}
 
 		return $ord;
@@ -607,7 +607,7 @@ final class PwndTemplate extends TemplateAbstract{
 	private function base64_chr(int $ord):string{
 
 		if(!isset(self::BASE64[$ord])){
-			throw new InvalidArgumentException(sprintf('invalid ordinal given: "%s"', $ord));
+			throw new InvalidArgumentException(sprintf('invalid ordinal given: "%s"', $ord)); // @codeCoverageIgnore
 		}
 
 		return self::BASE64[$ord];
