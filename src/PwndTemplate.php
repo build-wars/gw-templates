@@ -12,11 +12,27 @@ declare(strict_types=1);
 namespace BuildWars\GWTemplates;
 
 use InvalidArgumentException;
+use RuntimeException;
 use Throwable;
-use function array_unshift;
+use function array_fill;
+use function array_key_exists;
+use function array_keys;
+use function array_map;
+use function array_sum;
+use function array_values;
+use function boolval;
+use function count;
+use function explode;
 use function implode;
 use function intdiv;
+use function intval;
 use function is_string;
+use function max;
+use function mb_detect_encoding;
+use function mb_internal_encoding;
+use function min;
+use function sprintf;
+use function str_contains;
 use function str_replace;
 use function str_split;
 use function str_starts_with;
@@ -27,78 +43,221 @@ use function substr;
 use function trim;
 
 /**
- * Encodes and decodes paw·ned² team build templates
+ * Biblically accurate paw·ned² team build encoder/decoder
  *
- * Thanks to Antodias (formerly gwcom.de)
+ * Thanks to Redeemer (paw·ned² developer) and Antodias (formerly gwcom.de)!
  *
  * @link https://memorial.redeemer.biz/pawned2/
  */
 final class PwndTemplate extends TemplateAbstract{
 
-	private const PWND_PREFIX = 'pwnd0001';
-	private const PWND_HEADER = 'pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates';
+	public const PAWNED_CHARSET_UNDEFINED   = 0;
+	public const PAWNED_CHARSET_WINDOWS1252 = 1;
+	public const PAWNED_CHARSET_UTF8        = 2;
+
+	public const ENCODINGS = [
+		self::PAWNED_CHARSET_UNDEFINED   => 'undefined',
+		self::PAWNED_CHARSET_WINDOWS1252 => 'Windows-1252',
+		self::PAWNED_CHARSET_UTF8        => 'UTF-8',
+	];
+
+	public const CON_LUNAR_FORTUNE       = 0;
+	public const CON_CANDY_CORN          = 1;
+	public const CON_GOLDEN_EGG          = 2;
+	public const CON_BDAY_CUPCAKE        = 3;
+	public const CON_PUMPKIN_PIE         = 4;
+	public const CON_CANDY_APPLE         = 5;
+	public const CON_WAR_SUPPLIES        = 6;
+	public const CON_DRAKE_KABOB         = 7;
+	public const CON_SKALEFIN_SOUP       = 8;
+	public const CON_PAHNAI_SALAD        = 9;
+	public const CON_GREEN_CANDY         = 10;
+	public const CON_BLUE_CANDY          = 11;
+	public const CON_RED_CANDY           = 12;
+	public const CON_ESSENCE_OF_CELERITY = 13;
+	public const CON_ARMOR_OF_SALVATION  = 14;
+	public const CON_GRAIL_OF_MIGHT      = 15;
+	// not yet implemented
+#	public const MOD_OF_THE_WARRIOR      = 16;
+#	public const MOD_OF_THE_RANGER       = 17;
+#	public const MOD_OF_THE_MONK         = 18;
+#	public const MOD_OF_THE_NECROMACER   = 19;
+#	public const MOD_OF_THE_MESMER       = 20;
+#	public const MOD_OF_THE_ELEMENTALIST = 21;
+#	public const MOD_OF_THE_ASSASSIN     = 22;
+#	public const MOD_OF_THE_RITUALIST    = 23;
+#	public const MOD_OF_THE_PARAGON      = 24;
+#	public const MOD_OF_THE_DERVISH      = 25;
+
+	public const FLAGS = [
+		self::CON_LUNAR_FORTUNE       => 'buLunarFortune',
+		self::CON_CANDY_CORN          => 'buCandyCorn',
+		self::CON_GOLDEN_EGG          => 'buGoldenEgg',
+		self::CON_BDAY_CUPCAKE        => 'buBirthdayCupcake',
+		self::CON_PUMPKIN_PIE         => 'buSliceOfPumpkinPie',
+		self::CON_CANDY_APPLE         => 'buCandyApple',
+		self::CON_WAR_SUPPLIES        => 'buWarSupplies',
+		self::CON_DRAKE_KABOB         => 'buDrakeKabob',
+		self::CON_SKALEFIN_SOUP       => 'buBowlOfSkalefinSoup',
+		self::CON_PAHNAI_SALAD        => 'buPahnaiSalad',
+		self::CON_GREEN_CANDY         => 'buGreenRockCandy',
+		self::CON_BLUE_CANDY          => 'buBlueRockCandy',
+		self::CON_RED_CANDY           => 'buRedRockCandy',
+		self::CON_ESSENCE_OF_CELERITY => 'buEssenceOfCelerity',
+		self::CON_ARMOR_OF_SALVATION  => 'buArmorOfSalvation',
+		self::CON_GRAIL_OF_MIGHT      => 'buGrailOfMight',
+		// not yet implemented
+#		self::MOD_OF_THE_WARRIOR      => 'buOfTheWarrior',
+#		self::MOD_OF_THE_RANGER       => 'buOfTheRanger',
+#		self::MOD_OF_THE_MONK         => 'buOfTheMonk',
+#		self::MOD_OF_THE_NECROMACER   => 'buOfTheNecromancer',
+#		self::MOD_OF_THE_MESMER       => 'buOfTheMesmer',
+#		self::MOD_OF_THE_ELEMENTALIST => 'buOfTheElementalist',
+#		self::MOD_OF_THE_ASSASSIN     => 'buOfTheAsssassin',
+#		self::MOD_OF_THE_RITUALIST    => 'buOfTheRitualist',
+#		self::MOD_OF_THE_PARAGON      => 'buOffTheParagon',
+#		self::MOD_OF_THE_DERVISH      => 'buOffTheDervish',
+	];
 
 	/**
-	 * @var array{skills: string, equipment:string, weaponsets: string[], player: string, description: string}[]
+	 * Map of profession => UI/flag attribute order
+	 *
+	 * (primary attribute first, followed by the other attributes)
+	 *
+	 * @var array<int, int[]>
+	 */
+	public const ATTRIBUTE_ORDER = [
+		1  => [17, 18, 19, 20, 21],
+		2  => [23, 22, 24, 25],
+		3  => [16, 13, 14, 15],
+		4  => [6, 4, 5, 7],
+		5  => [0, 1, 2, 3],
+		6  => [12, 8, 9, 10, 11],
+		7  => [35, 29, 30, 31],
+		8  => [36, 32, 33, 34],
+		9  => [40, 37, 38, 39],
+		10 => [44, 41, 42, 43],
+	];
+
+	private const PWND_HEADER_PREFIX  = 'pwnd';
+	private const PWND_HEADER_COMMENT = 'pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates';
+	private const BASE64              = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+	/**
+	 * @var array{skills: string, equipment: string, weaponsets: string[], flags: string, player: string, description: string}[]
 	 */
 	private array $builds = [];
+
+	private readonly string $encoding;
+	private readonly int    $encodingFlag;
+
+	/**
+	 * PwndTemplate constructor
+	 *
+	 * The `$encodingFlag` parameter is only used in template encoding operations.
+	 * Template decoding uses the flag given in the template header.
+	 */
+	public function __construct(int $encodingFlag = self::PAWNED_CHARSET_UTF8){
+		$this->encoding     = self::getEncoding($encodingFlag);
+		$this->encodingFlag = $encodingFlag;
+	}
+
+	/**
+	 * Parses the paw-ned² header flags
+	 *
+	 *   0: breaking change
+	 *   1: unused
+	 *   2: unused
+	 *   3: character encoding
+	 *
+	 * @throws \RuntimeException
+	 */
+	public static function parseHeader(string $pwnd):array{
+		$header = substr($pwnd, 0, 8);
+
+		if(!str_starts_with($header, 'pwnd')){
+			throw new RuntimeException('invalid paw-ned² template');
+		}
+
+		// read header flags, skip over the "pwnd"
+		$headerFlags = array_map(intval(...), str_split(substr($header, 4)));
+
+		if($headerFlags[0] !== 0){
+			throw new RuntimeException('paw-ned² breaking change detected');
+		}
+
+		return $headerFlags;
+	}
+
+	/**
+	 * Returns the character encoding given in the header flag
+	 *
+	 * @see \mb_list_encodings()
+	 * @throws \InvalidArgumentException
+	 */
+	public static function getEncoding(int $encodingFlag):string{
+
+		if(!array_key_exists($encodingFlag, self::ENCODINGS)){
+			throw new InvalidArgumentException('invalid encoding flag');
+		}
+
+		return self::ENCODINGS[$encodingFlag];
+	}
 
 	/**
 	 * Decodes the given paw-ned² template into an array
 	 *
-	 * @return array{skills: string, equipment:string, weaponsets: string[], player: string, description: string, flags: string}[]
+	 * @return array{skills: string, equipment:string, weaponsets: string[], templatename: string, description: string, player: string, attributes: int[], flags: bool[]}[]
+	 * @throws \InvalidArgumentException
 	 */
 	public function decode(string $pwnd):array{
-		$pwnd  = str_replace(["\r", "\n"], '', trim($pwnd));
-		$start = strrpos($pwnd, '>');
-		$_end  = strpos($pwnd, '<', $start);
-		$end   = ($_end - 1);
+		// detect encoding (we're doing this first as the header parser will throw on invalid template)
+		$headerFlags = self::parseHeader($pwnd);
+		$encoding    = self::getEncoding($headerFlags[3]);
 
-		if(!str_starts_with($pwnd, 'pwnd000') || $start === false || $_end === false || $end <= $start){
+		// find the template string
+		$pwnd  = str_replace(["\r", "\n"], '', trim($pwnd));
+		$start = strrpos($pwnd, '>'); // maybe not the best idea... (better than reading from the start tho)
+		$end   = strpos($pwnd, '<', $start);
+
+		if($start === false || $end === false || ($end - 1) <= $start){
 			throw new InvalidArgumentException('invalid paw-ned² template');
 		}
 
-#		$header = substr($pwnd, 0, $start);
-		$b64    = str_replace(' ', '+', substr($pwnd, ($start + 1), ($end - $start)));
-		$total  = strlen($b64);
+		// fix possible URL de/encoding errors in the base64 string
+		$this->string = $this->checkCharacterSet(substr($pwnd, ($start + 1), ($end - 1 - $start)));
+		$this->offset = 0;
+
+		$total  = strlen($this->string);
 		$builds = [];
-		$offset = 0;
 
-		$read = function(int $length) use ($b64, &$offset):string{
-			$str     = substr($b64, $offset, $length);
-			$offset += $length;
-
-			return $str;
-		};
-
-		while($offset < $total){
-
-			$build = [
-				'skills'      => $read($this->base64_ord($read(1))),
-				'equipment'   => $read($this->base64_ord($read(1))),
-				'weaponsets'  => [],
-				'player'      => '',
-				'description' => '',
-				'flags'       => '',
-			];
+		while($this->offset < $total){
+			$skills     = $this->readString();
+			$equipment  = $this->readString();
+			$weaponsets = [];
 
 			for($i = 0; $i < 3; $i++){
-				$build['weaponsets'][$i] = $read($this->base64_ord($read(1)));
+				$weaponsets[$i] = $this->readString();
 			}
 
-			// nobody knows what the flags are or how they're encoded, so we may as well ignore them
-			// (i think it's additional skill points and pcons in the UI)
-			$build['flags']  = $read($this->base64_ord($read(1)));
-			$player_length   = $this->base64_ord($read(1));
-			$build['player'] = $this->base64decode($read($player_length)); // 32 bytes max
+			$extra  = $this->readString();
+			$player = $this->readString();
+			$desc   = $this->readString(true);
 
-			$desc_length  = ($this->base64_ord($read(1)) * 64);
-			$desc_length += $this->base64_ord($read(1));
+			[$templatename, $description] = $this->decodeDescription($desc, $encoding);
+			/** @phan-suppress-next-line PhanTypeInvalidDimOffsetArrayDestructuring ??? */
+			[$attributeBonuses, $flags]   = $this->decodeFlags($extra);
 
-			// the description field is slot name and description glued by a \n, variable length each, a total of 256 bytes
-			$build['description'] = $this->base64decode($read($desc_length));
-
-			$builds[] = $build;
+			$builds[] = [
+				'skills'       => $skills,
+				'equipment'    => $equipment,
+				'weaponsets'   => $weaponsets,
+				'templatename' => $templatename,
+				'description'  => $description,
+				'player'       => $this->decodePlayerName($player, $encoding),
+				'attributes'   => $attributeBonuses,
+				'flags'        => $flags,
+			];
 		}
 
 		return $builds;
@@ -108,55 +267,62 @@ final class PwndTemplate extends TemplateAbstract{
 	 * Encodes the given build(s) into a paw-ned² template
 	 */
 	public function encode():string{
-		$write = fn(string $str):string => $this->base64_chr(strlen($str)).$str;
-		$pwnd  = '';
+		$pwnd = '>';
 
 		foreach($this->builds as $build){
-			$pwnd .= $write($build['skills']);
-			$pwnd .= $write($build['equipment']);
+			$pwnd .= $this->writeString($build['skills']);
+			$pwnd .= $this->writeString($build['equipment']);
 
 			foreach($build['weaponsets'] as $set){
-				$pwnd .= $write($set);
+				$pwnd .= $this->writeString($set);
 			}
 
-			$pwnd .= $write(''); // we're setting the flags to zero-length
-			$pwnd .= $write($build['player']);
-
-			$desc_length = strlen($build['description']);
-
-			$pwnd .= $this->base64_chr(intdiv($desc_length, 64));
-			$pwnd .= $this->base64_chr($desc_length % 64);
-			$pwnd .= $build['description'];
+			$pwnd .= $this->writeString($build['flags']);
+			$pwnd .= $this->writeString($build['player']);
+			$pwnd .= $this->writeString($build['description'], true);
 		}
 
-		$pwnd = str_split('>'.$pwnd.'<', 80);
+		$pwnd .= '<';
 
-		array_unshift($pwnd, self::PWND_PREFIX.'?'.self::PWND_HEADER);
-
-		return implode("\r\n", $pwnd);
+		return sprintf(
+			"%s%s?%s\n%s",
+			self::PWND_HEADER_PREFIX,
+			$this->writeHeaderFlags(),
+			self::PWND_HEADER_COMMENT,
+			implode("\n", str_split($pwnd, 80)),
+		);
 	}
 
 	/**
 	 * Adds a build item
 	 *
 	 * @param string[] $weaponsets
+	 * @param int[]    $attributes
+	 * @param bool[]   $flags
+	 * @throws \InvalidArgumentException
 	 */
 	public function addBuild(
-		string      $skills,
-		string|null $equipment = null,
-		array       $weaponsets = [],
-		string|null $player = null,
-		string|null $description = null,
-		string|null $slotname = null,
+		string $skills,
+		string $equipment = '',
+		array  $weaponsets = [],
+		string $templatename = '',
+		string $description = '',
+		string $player = '',
+		array  $attributes = [],
+		array  $flags = [],
 	):self{
+
+		if(count($this->builds) >= 12){
+			throw new InvalidArgumentException('maximum 12 builds');
+		}
 
 		$this->builds[] = [
 			'skills'      => $this->checkCharacterSet($skills),
-			'equipment'   => $this->checkCharacterSet(($equipment ?? '')),
+			'equipment'   => $this->checkCharacterSet($equipment),
 			'weaponsets'  => $this->normalizeWeaponsets($weaponsets),
-			'player'      => $this->base64encode(($player ?? '')),
-			// $slotname."\n".$description
-			'description' => $this->base64encode(($description ?? "\n")),
+			'flags'       => $this->encodeFlags($attributes, $flags),
+			'player'      => $this->encodePlayername($player, $this->encoding),
+			'description' => $this->encodeDescription($templatename, $description, $this->encoding),
 		];
 
 		return $this;
@@ -164,6 +330,8 @@ final class PwndTemplate extends TemplateAbstract{
 
 	/**
 	 * Clears all currently added build items
+	 *
+	 * @codeCoverageIgnore
 	 */
 	public function clearBuilds():self{
 		$this->builds = [];
@@ -214,6 +382,290 @@ final class PwndTemplate extends TemplateAbstract{
 		}
 
 		return $normalizedWeaponsets;
+	}
+
+	/**
+	 * Decodes the player name field
+	 */
+	private function decodePlayerName(string $playerB64, string $from_encoding):string{
+		$player = $this->base64decode($playerB64);
+
+		return $this->decodeField($player, $from_encoding);
+	}
+
+	/**
+	 * Encodes the player name field according to the given character encoding
+	 *
+	 * @throws \InvalidArgumentException
+	 */
+	private function encodePlayername(string $name, string $to_encoding):string{
+		$name = trim($name);
+
+		if($name === ''){
+			return '';
+		}
+
+		$encodedName = $this->encodeField($name, $to_encoding);
+		$encodedLen  = strlen($encodedName);
+
+		// 32 in windows-1252/ASCII, 48 in utf-8, apparently
+		if($this->encodingFlag !== self::PAWNED_CHARSET_UTF8 && $encodedLen > 32){
+			throw new InvalidArgumentException('player name cannot be longer than 32 bytes');
+		}
+		elseif($encodedLen > 48){
+			throw new InvalidArgumentException('player name cannot be longer than 48 bytes in UTF-8 mode');
+		}
+
+		return $this->base64encode($encodedName);
+	}
+
+	/**
+	 * Decodes the template name/description field
+	 *
+	 * @return array{0: string, 1: string}
+	 */
+	private function decodeDescription(string $descB64, string $from_encoding):array{
+		$desc = $this->base64decode($descB64);
+		$desc = $this->decodeField($desc, $from_encoding);
+
+		// the LF should always be present, even if both fields are empty
+		if(strlen($desc) <= 1){
+			return ['', ''];
+		}
+
+		// for some reason there was no LF character, we'll assume that whatever the string is as template name
+		if(!str_contains($desc, "\n")){
+			return [$desc, ''];
+		}
+
+		return explode("\n", $desc, 2);
+	}
+
+	/**
+	 * Encodes the description field from the given template name and description
+	 *
+	 * @throws \InvalidArgumentException
+	 */
+	private function encodeDescription(string $templatename, string $description, string $to_encoding):string{
+		// field is empty, always return a line break
+		if($templatename.$description === ''){
+			return 'Cg'; // "\n" in base64
+		}
+
+		$templatename = $this->encodeField($templatename, $to_encoding);
+		$description  = $this->encodeField($description, $to_encoding);
+		$field        = $templatename."\n".$description;
+
+		// for some reason the field can be longer than 255, up to 2-3 bytes [citation needed]
+		if(strlen($field) > 258){
+			throw new InvalidArgumentException('template name and description combined cannot be longer than 255 bytes');
+		}
+
+		return $this->base64encode($field);
+	}
+
+	/**
+	 * Decodes Attribute bonuses and flags
+	 *
+	 * @return array{0: int[], 2: bool[]}
+	 * @phan-suppress PhanTypeMismatchReturn
+	 */
+	private function decodeFlags(string $flagsB64):array{
+
+		if($flagsB64 === ''){
+			// return an "empty" array
+			return [
+				array_fill(0, 5, 0),
+				array_fill(0, count(self::FLAGS), false),
+			];
+		}
+
+		$bin8     = $this->base64decode($flagsB64);
+		$base2    = $this->decodeBinaryToBase2($bin8);
+		$bonuses  = array_map($this->bindec_flip(...), str_split(substr($base2, 0, 15), 3));
+		// the flag string might not always be complete
+		$flag_val = str_split(substr($base2, 18, 16));
+
+		$flags = [];
+
+		foreach(array_keys(self::FLAGS) as $flag){
+			$flags[$flag] = isset($flag_val[$flag]) && boolval($flag_val[$flag]) === true;
+		}
+
+		return [$bonuses, $flags];
+	}
+
+	/**
+	 * @param int[]  $attributes
+	 * @param bool[] $flags
+	 */
+	private function encodeFlags(array $attributes, array $flags):string{
+		$attributes = array_values($attributes);
+		$flag_sum   = array_sum($flags);
+
+		if(array_sum($attributes) === 0 && $flag_sum === 0){
+			return '';
+		}
+
+		$bin = '';
+
+		// write 5 times 3 bits
+		for($i = 0; $i < 5; $i++){
+			$bin .= $this->decbin_pad(max(0, min(intval($attributes[$i] ?? 0), 7)), 3);
+		}
+
+		// add 3 empty bits as terminator
+		$bin .= '000';
+
+		// we'll only write flags if any of them are set
+		if($flag_sum > 0){
+			foreach(array_keys(self::FLAGS) as $flag){
+				$bin .= (int)(isset($flags[$flag]) && boolval($flags[$flag]) === true);
+			}
+		}
+
+		$bin = $this->encodeBase2ToBinary($bin);
+
+		return $this->base64encode($bin);
+	}
+
+	/**
+	 * Converts the given string from the given encoding to UTF-8 (or internal encoding)
+	 *
+	 * @throws \RuntimeException
+	 */
+	private function decodeField(string $data, string $from_encoding):string{
+		$internal_encoding = mb_internal_encoding();
+
+		if($data === '' || $from_encoding === $internal_encoding){
+			return $data;
+		}
+
+		if($from_encoding === 'undefined'){
+			$from_encoding = mb_detect_encoding($data, ['Windows-1252', 'UTF-8', 'ASCII'], true);
+
+			if($from_encoding === false){
+				throw new RuntimeException('cannot detect encoding of the given string');
+			}
+		}
+
+		$data = mb_convert_encoding($data, $internal_encoding, $from_encoding);
+
+		if($data === false){
+			throw new RuntimeException(sprintf('error converting from %s', $from_encoding));
+		}
+
+		return trim($data);
+	}
+
+	/**
+	 * Converts the given string to the given encoding from UTF-8 (or internal encoding)
+	 *
+	 * @throws \RuntimeException
+	 */
+	private function encodeField(string $data, string $to_encoding):string{
+		$internal_encoding = mb_internal_encoding();
+
+		if($data === '' || $to_encoding === $internal_encoding){
+			return $data;
+		}
+
+		if($to_encoding === 'undefined'){
+			$to_encoding = 'ASCII'; // not sure on that one, we'll run with it for now
+		}
+
+		$data = mb_convert_encoding($data, $to_encoding, $internal_encoding);
+
+		if($data === false){
+			throw new RuntimeException(sprintf('error converting to %s', $to_encoding));
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Returns the ordinal for the given base64 character
+	 *
+	 * @throws \InvalidArgumentException
+	 */
+	private function base64_ord(string $chr):int{
+		/** @phan-suppress-next-line PhanParamSuspiciousOrder */
+		$ord = strpos(self::BASE64, $chr);
+
+		if($ord === false){
+			throw new InvalidArgumentException(sprintf('invalid character given: "%s"', $chr));
+		}
+
+		return $ord;
+	}
+
+	/**
+	 * Returns the base64 character for the given ordinal
+	 *
+	 * @throws \InvalidArgumentException
+	 */
+	private function base64_chr(int $ord):string{
+
+		if(!isset(self::BASE64[$ord])){
+			throw new InvalidArgumentException(sprintf('invalid ordinal given: "%s"', $ord));
+		}
+
+		return self::BASE64[$ord];
+	}
+
+	/**
+	 * Reads a base64 encoded field from the template string
+	 */
+	private function readString(bool $isVariableField = false):string{
+		$length = $this->read(1);
+
+		if($isVariableField){
+			$length *= 64;
+			$length += $this->read(1);
+		}
+
+		$str           = substr($this->string, $this->offset, $length);
+		$this->offset += $length;
+
+		return $str;
+	}
+
+	/**
+	 * Writes a base64 encoded field to the template string
+	 */
+	private function writeString(string $str, bool $isVariableField = false):string{
+		$length = strlen($str);
+
+		if($isVariableField){
+			$len  = $this->base64_chr(intdiv($length, 64));
+			$len .= $this->base64_chr($length % 64);
+
+			return $len.$str;
+		}
+
+		return $this->base64_chr($length).$str;
+	}
+
+	/**
+	 * Encodes the header flag string
+	 */
+	private function writeHeaderFlags():string{
+		// not much to do here yet
+		$headerFlags = [0, 0, 0, $this->encodingFlag];
+
+		return implode('', $headerFlags);
+	}
+
+	/**
+	 * Reads a length byte from the template string
+	 *
+	 * @see \BuildWars\GWTemplates\PwndTemplate::readString()
+	 */
+	protected function read(int $length):int{
+		$dec           = $this->base64_ord(substr($this->string, $this->offset, $length));
+		$this->offset += $length;
+
+		return $dec;
 	}
 
 }

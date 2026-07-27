@@ -23,7 +23,7 @@ use function array_column;
 class PwndTemplateTest extends TestCase{
 
 	/**
-	 * @return array{0: string, 1: string[], 2: string}[]
+	 * @return array{0: string, 1: string[], 2: string[], 3: string}[]
 	 */
 	public static function pwndTemplateProvider():array{
 		return [
@@ -58,22 +58,34 @@ class PwndTemplateTest extends TestCase{
 					'OABCY4xEAglAj4ngdQVFAQZA',
 					'OgNDwcjvOkk6hWEqtp9H0iaB',
 				],
-				'pwnd0001?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates'."\r\n".
-				'>aOwFj0xfzITOMMMHMie4O0k6PxZaPkpxFP9FzSqAA5AAJBAZBApBAJAAAAIUGxheWVyAMMSAtIFdvdE'."\r\n".
-				'EKZOAOj4wiM5MXTMm3cZS9dJOu5BpPkppFFEqtEAFEqncAFEaqmAFEaY7/EEaYRIHeqXjEAAAAIWGFuZ'."\r\n".
-				'HJhATMiAtIFNvUy9TbWl0ZQoZOQNEApwT2zQDmemuhQOIDQEQjoPgp5PCicJCDBR6JzigItw4SQkhtDI'."\r\n".
-				'IyMgJHeqXjEPPgpghmZ9phOzriUAAAGR3dlbgAOMyAtIFBhbml4CgZOQNDAcw9QvAIg5ZjOkAcQOBoRo'."\r\n".
-				'PgpZQCikJCXBR6JnrgItw0VQkht3KIywCKHeqXjEQPkpwRNz6TjdMvKSBAAAHTm9yZ3UAONCAtIEluZX'."\r\n".
-				'AxCgZOQNDAawDSvAIg5ZrAFgZAEBoRoPgpZQCikJCXBR6JnrgItw0VQkht3KIywCKHeqXjEQPkpwRNz6'."\r\n".
-				'TjdMvKSBAAAbUmF6YWggb3IgW01lcmNlbmFyeV0AONSAtIEluZXAyCgbOAhkQkGZIfMzdwQM0qqSzJnw'."\r\n".
-				'7iBoPgpZRCi8JiYBR6JXsgI7wMWQkhtDLISOALHeqXjELPkZwUP9akeKAAAHTGl2aWEALNiAtIEJpUAo'."\r\n".
-				'ZOAWiQyhMp7INN5I8Y5wJOOZNBpPkpxUP96Xfq4npI908npIDLropIvV3npIDr7npITFAAAAbUmF6YWg'."\r\n".
-				'gb3IgW01lcmNlbmFyeV0AONyAtIFJlc3RvCgXOAOiAyk8gNtehzWilD56MvYpPkp5EFEKuEAFEqncAFE'."\r\n".
-				'aqmAFEaY7/EEaYBIHiKbkILPkZAIP9akeKAAAIWmVpIFJpAKOCAtIFNUCgYOABCY4xEAglAj4ngdQVFA'."\r\n".
-				'QZAoPgpxlne9rPVaYKSPNvMFJYJRmiEKtATRGW7ipI7AAAAAHT2xpYXMBgNSAtIE1vUApzZWNvbmRhcn'."\r\n".
-				'kgcHJvZmVzc2lvbiBhbmQgZWxpdGUgc2tpbGwgYXJlIGZyZWUsIGJhcmJzIGlzIG9wdGlvbmFsYOgNDw'."\r\n".
-				'cjvOkk6hWEqtp9H0iaBpPkpBUPbTkiqwmpI900mpIDLbipIvSvmpIDrzmpINBAAAAUWmhlZCBTaGFkb3'."\r\n".
-				'dob29mAMNyAtIEUvTW8K<',
+				[
+					'1 - WotA',
+					'2 - SoS/Smite',
+					'3 - Panix',
+					'4 - Inep1',
+					'5 - Inep2',
+					'6 - BiP',
+					'7 - Resto',
+					'8 - ST',
+					'5 - MoP',
+					'7 - E/Mo',
+				],
+				'pwnd0000?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates'."\n".
+				'>aOwFj0xfzITOMMMHMie4O0k6PxZaPkpxFP9FzSqAA5AAJBAZBApBAJAAAEgJAAIUGxheWVyAMMSAtIF'."\n".
+				'dvdEEKZOAOj4wiM5MXTMm3cZS9dJOu5BpPkppFFEqtEAFEqncAFEaqmAFEaY7/EEaYRIHeqXjEAAAEAg'."\n".
+				'AAIWGFuZHJhATMiAtIFNvUy9TbWl0ZQoZOQNEApwT2zQDmemuhQOIDQEQjoPgp5PCicJCDBR6JzigItw'."\n".
+				'4SQkhtDIIyMgJHeqXjEPPgpghmZ9phOzriUAAEIhAAGR3dlbgAOMyAtIFBhbml4CgZOQNDAcw9QvAIg5'."\n".
+				'ZjOkAcQOBoRoPgpZQCikJCXBR6JnrgItw0VQkht3KIywCKHeqXjEQPkpwRNz6TjdMvKSBAAEMAAAHTm9'."\n".
+				'yZ3UAONCAtIEluZXAxCgZOQNDAawDSvAIg5ZrAFgZAEBoRoPgpZQCikJCXBR6JnrgItw0VQkht3KIywC'."\n".
+				'KHeqXjEQPkpwRNz6TjdMvKSBAAEMBAAbUmF6YWggb3IgW01lcmNlbmFyeV0AONSAtIEluZXAyCgbOAhk'."\n".
+				'QkGZIfMzdwQM0qqSzJnw7iBoPgpZRCi8JiYBR6JXsgI7wMWQkhtDLISOALHeqXjELPkZwUP9akeKAAEg'."\n".
+				'JAAHTGl2aWEALNiAtIEJpUAoZOAWiQyhMp7INN5I8Y5wJOOZNBpPkpxUP96Xfq4npI908npIDLropIvV'."\n".
+				'3npIDr7npITFAAAEEBAAbUmF6YWggb3IgW01lcmNlbmFyeV0AONyAtIFJlc3RvCgXOAOiAyk8gNtehzW'."\n".
+				'ilD56MvYpPkp5EFEKuEAFEqncAFEaqmAFEaY7/EEaYBIHiKbkILPkZAIP9akeKAAEgBAAIWmVpIFJpAK'."\n".
+				'OCAtIFNUCgYOABCY4xEAglAj4ngdQVFAQZAoPgpxlne9rPVaYKSPNvMFJYJRmiEKtATRGW7ipI7AAAAA'."\n".
+				'HT2xpYXMBgNSAtIE1vUApzZWNvbmRhcnkgcHJvZmVzc2lvbiBhbmQgZWxpdGUgc2tpbGwgYXJlIGZyZW'."\n".
+				'UsIGJhcmJzIGlzIG9wdGlvbmFsYOgNDwcjvOkk6hWEqtp9H0iaBpPkpBUPbTkiqwmpI900mpIDLbipIv'."\n".
+				'SvmpIDrzmpINBAAAAUWmhlZCBTaGFkb3dob29mAMNyAtIEUvTW8K<',
 			],
 			[
 				<<<PWND2
@@ -99,59 +111,163 @@ class PwndTemplateTest extends TestCase{
 					'OAhkQoGYIfI0dwQjdAnowj00kTVF',
 					'OAOiAyk8gNtehTLXLB56MvY',
 				],
-				'pwnd0001?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates'."\r\n".
-				'>ZOACiQyiMVNxMNAa5YsdN5DWOBpPkpRIPZzXjq4npI908npIDLtopItV3npIDr7npITFAAAAAAGU29T'."\r\n".
-				'CgZOQNEAqwD2yQDmeDhLQOIDQEQjoPgpxkne9rPVYYKSPNuMFZY5PmicJdATRmBzipItAAAAAAAIUGFu'."\r\n".
-				'aXgKZOQNDAcw9QvAIg5ZrAkAcQOBoRoPgpBlne9rPVYYKSPNuMFZYZQmikJdATRmBzipItAAAAAAATSW'."\r\n".
-				'5lcC9FcGlkZW1pYwobOQNEAawD2C9CgAmntCUAmBQEgGBoPgpBlne9rPVYYKSPNuMFZYZQmikJdATRmB'."\r\n".
-				'zipItAAAAAAAPSW5lcC9JbnNwaQocOAhkUwG4hEqUMzXgC4Wodg00kTVFoPgphlne9rPVEbKSPNjNFZY'."\r\n".
-				'ZRmusGdYTRGWXspI7AAAAAAAWRGlzY29yZC9SZXN0byAxCgcOAhkUwG4hEqUMzXgC4Wowj00kTVFoPgp'."\r\n".
-				'hlne9rPVEbKSPNjNFZYZRmusGdYTRGWXspI7AAAAAAAWRGlzY29yZC9SZXN0byAyCgcOAhkQoGYIfI0d'."\r\n".
-				'wQjdAnowj00kTVFoPgpRlnsxSPVEbiWPNjNRbY5QmolGdYT0yBXsJa7AAAAAAAOQmlQL1Jlc3RvCgXOA'."\r\n".
-				'OiAyk8gNtehTLXLB56MvYpPkpxHPZzXto4npI908npIDLnopIxV3npIDr7npITFAAAAAALU1QgUHJvdA'."\r\n".
-				'o<',
+				[
+					'SoS',
+					'Panix',
+					'Inep/Epidemic',
+					'Inep/Inspi',
+					'Discord/Resto 1',
+					'Discord/Resto 2',
+					'BiP/Resto',
+					'ST Prot',
+				],
+				'pwnd0001?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates'."\n".
+				'>ZOACiQyiMVNxMNAa5YsdN5DWOBpPkpRIPZzXjq4npI908npIDLtopItV3npIDr7npITFAAAIAhA//PA'."\n".
+				'AAAGU29TCgZOQNEAqwD2yQDmeDhLQOIDQEQjoPgpxkne9rPVYYKSPNuMFZY5PmicJdATRmBzipItAAAA'."\n".
+				'EIhAAAAIUGFuaXgKZOQNDAcw9QvAIg5ZrAkAcQOBoRoPgpBlne9rPVYYKSPNuMFZYZQmikJdATRmBzip'."\n".
+				'ItAAAAEMAAAAATSW5lcC9FcGlkZW1pYwobOQNEAawD2C9CgAmntCUAmBQEgGBoPgpBlne9rPVYYKSPNu'."\n".
+				'MFZYZQmikJdATRmBzipItAAAAEMBAAAAPSW5lcC9JbnNwaQocOAhkUwG4hEqUMzXgC4Wodg00kTVFoPg'."\n".
+				'phlne9rPVEbKSPNjNFZYZRmusGdYTRGWXspI7AAAAEEIAAAAWRGlzY29yZC9SZXN0byAxCgcOAhkUwG4'."\n".
+				'hEqUMzXgC4Wowj00kTVFoPgphlne9rPVEbKSPNjNFZYZRmusGdYTRGWXspI7AAAAEEIAAAAWRGlzY29y'."\n".
+				'ZC9SZXN0byAyCgcOAhkQoGYIfI0dwQjdAnowj00kTVFoPgpRlnsxSPVEbiWPNjNRbY5QmolGdYT0yBXs'."\n".
+				'Ja7AAAAEYJAAAAOQmlQL1Jlc3RvCgXOAOiAyk8gNtehTLXLB56MvYpPkpxHPZzXto4npI908npIDLnop'."\n".
+				'IxV3npIDr7npITFAAAEgCAAAALU1QgUHJvdAo<',
+			],
+			[
+				<<<PWND3
+				pwnd0001?download pawned2 @ memorial.redeemer.biz | Copyright 2008-2018 Redeemer
+				>cOwFkMyd534lkDjzzBjoHuDNZcm+DoPkpxFP9FySqIlpI90MlpIDLfYpI7oMFZpcpMFpoALPkZATPZj
+				lsILPcZg8z6QJpCRPgpgnnN4SJNSauVlCGjLA//PrxMTExMTExMTExMTExMTExMTExMTExMTExMTExMT
+				ExMQFWRU5D1kRJTkctVMRTVAowMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3OD
+				lhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzND
+				U2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMD
+				EyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2
+				RlZjAxMjM0NTY3ODlhYmNkZWYwMQQOQBAAAAAAAAAAAAAAAAAGAAA//BAACCgQOQBAAAAAAAAAAAAAAA
+				AAAAACCgQOABAAAAAAAAAAAAAAAAAAAACCg<
+				PWND3,
+				[
+					'OwFkMyd534lkDjzzBjoHuDNZcm+D',
+					'OQBAAAAAAAAAAAAA',
+					'OQBAAAAAAAAAAAAA',
+					'OABAAAAAAAAAAAAA',
+				],
+				[
+					'ENCÖDING-TÄST',
+					'',
+					'',
+					'',
+				],
+				'pwnd0001?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates'."\n".
+				'>cOwFkMyd534lkDjzzBjoHuDNZcm+DoPkpxFP9FySqIlpI90MlpIDLfYpI7oMFZpcpMFpoALPkZATPZj'."\n".
+				'lsILPcZg8z6QJpCRPgpgnnN4SJNSauVlCIjLA//PAArxMTExMTExMTExMTExMTExMTExMTExMTExMTEx'."\n".
+				'MTExMQFWRU5D1kRJTkctVMRTVAowMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3'."\n".
+				'ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIz'."\n".
+				'NDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVm'."\n".
+				'MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFi'."\n".
+				'Y2RlZjAxMjM0NTY3ODlhYmNkZWYwMQQOQBAAAAAAAAAAAAAAAAAIAAA//BAAAACCgQOQBAAAAAAAAAAA'."\n".
+				'AAAAAAAAACCgQOABAAAAAAAAAAAAAAAAAAAACCg<',
+			],
+			[
+				<<<PWND4
+				pwnd0002?download pawned2 @ memorial.redeemer.biz | Copyright 2008-2018 Redeemer
+				>cOwFkMyd534lkDjzzBjoHuDNZcm+DoPkpxFP9FySqIlpI90MlpIDLfYpI7oMFZpcpMFpoALPkZATPZj
+				lsILPcZg8z6QJpCRPgpgnnN4SJNSauVlCGjLA//P+w4TDhMOEw4TDhMOEw4TDhMOEw4TDhMOEw4TDhMO
+				Ew4TDhMOEw4TDhMOEw4TDhAFYRU5Dw5ZESU5HLVTDhFNUCjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg
+				5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ
+				1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjA
+				xMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmN
+				kZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxQOQBAAAAAAAAAAAAAAAAAGAAA//Bo5L
+				it5paH5Lit5paH5Lit5paH5Lit5paH5Lit5paHFS5Lit5paHCuS4reaWh+S4reaWh+S4reaWh+S4reaW
+				h+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaW
+				h+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaW
+				h+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaW
+				h+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWhwQOQBAAAAAAAAAAAAAAAAAA
+				o57K16Kqe57K16Kqe57K16Kqe57K16Kqe57K16KqeFS57K16KqeCueyteiqnueyteiqnueyteiqnueyt
+				eiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyt
+				eiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyt
+				eiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyt
+				eiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqngQOABAAAAAAAAAAAAAAA
+				AAAo7ZWc6rWt7Ja07ZWc6rWt7Ja07ZWc6rWt7Ja07ZWcFS7ZWc6rWt7Ja0Cu2VnOq1reyWtO2VnOq1re
+				yWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnO
+				q1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO
+				2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1re
+				yWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtA<
+				PWND4,
+				[
+					'OwFkMyd534lkDjzzBjoHuDNZcm+D',
+					'OQBAAAAAAAAAAAAA',
+					'OQBAAAAAAAAAAAAA',
+					'OABAAAAAAAAAAAAA',
+				],
+				[
+					'ENCÖDING-TÄST',
+					'中文',
+					'粵語',
+					'한국어',
+				],
+				'pwnd0002?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates'."\n".
+				'>cOwFkMyd534lkDjzzBjoHuDNZcm+DoPkpxFP9FySqIlpI90MlpIDLfYpI7oMFZpcpMFpoALPkZATPZj'."\n".
+				'lsILPcZg8z6QJpCRPgpgnnN4SJNSauVlCIjLA//PAA+w4TDhMOEw4TDhMOEw4TDhMOEw4TDhMOEw4TDh'."\n".
+				'MOEw4TDhMOEw4TDhMOEw4TDhAFYRU5Dw5ZESU5HLVTDhFNUCjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2N'."\n".
+				'zg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyM'."\n".
+				'zQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZ'."\n".
+				'jAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhY'."\n".
+				'mNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxQOQBAAAAAAAAAAAAAAAAAIAAA//BA'."\n".
+				'Ao5Lit5paH5Lit5paH5Lit5paH5Lit5paH5Lit5paHFU5Lit5paHCuS4reaWh+S4reaWh+S4reaWh+S4'."\n".
+				'reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4'."\n".
+				'reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4'."\n".
+				'reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4'."\n".
+				'reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWhwAAQOQBAAAAAAAAAAAA'."\n".
+				'AAAAAAo57K16Kqe57K16Kqe57K16Kqe57K16Kqe57K16KqeFU57K16KqeCueyteiqnueyteiqnueytei'."\n".
+				'qnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueytei'."\n".
+				'qnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueytei'."\n".
+				'qnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueytei'."\n".
+				'qnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqngAAQOABAAAAAAA'."\n".
+				'AAAAAAAAAAAo7ZWc6rWt7Ja07ZWc6rWt7Ja07ZWc6rWt7Ja07ZWcFU7ZWc6rWt7Ja0Cu2VnOq1reyWtO'."\n".
+				'2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1re'."\n".
+				'yWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnO'."\n".
+				'q1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO'."\n".
+				'2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtAAA<',
 			],
 		];
 	}
 
 	/**
-	 * @param string[] $expected
+	 * @param string[] $expectedSkills
+	 * @param string[] $expectedTemplatenames
 	 */
 	#[Test]
 	#[DataProvider('pwndTemplateProvider')]
-	public function decodePwnd(string $pwnd, array $expected, string $expectedCode):void{
+	public function encodePwnd(
+		string $pwnd,
+		array $expectedSkills,
+		array $expectedTemplatenames,
+		string $expectedCode,
+	):void{
+		// first decode and compare
 		$team = (new PwndTemplate)->decode($pwnd);
 
-		$this::assertSame($expected, array_column($team, 'skills'));
-	}
+		$this::assertSame($expectedSkills, array_column($team, 'skills'));
+		$this::assertSame($expectedTemplatenames, array_column($team, 'templatename'));
 
-	/**
-	 * @param string[] $expected
-	 */
-	#[Test]
-	#[DataProvider('pwndTemplateProvider')]
-	public function encodePwnd(string $pwnd, array $expected, string $expectedCode):void{
-		$pwndTemplate = new PwndTemplate;
-
-		$team = $pwndTemplate->decode($pwnd);
+		// now encode the given template
+		// use the given template's encoding, otherwise we might run into length issues
+		$headerflags  = PwndTemplate::parseHeader($pwnd);
+		$pwndTemplate = new PwndTemplate($headerflags[3]);
 
 		foreach($team as $build){
-			$pwndTemplate->addBuild(
-				$build['skills'],
-				$build['equipment'],
-				$build['weaponsets'],
-				$build['player'],
-				$build['description'],
-			);
+			$pwndTemplate->addBuild(...$build);
 		}
 
 		$code = $pwndTemplate->encode();
 
 		$this::assertSame($expectedCode, $code);
 
+		// decode the freshly encoded template and check again
 		$team = $pwndTemplate->decode($code);
 
-		$this::assertSame($expected, array_column($team, 'skills'));
+		$this::assertSame($expectedSkills, array_column($team, 'skills'));
+		$this::assertSame($expectedTemplatenames, array_column($team, 'templatename'));
 	}
 
 }
