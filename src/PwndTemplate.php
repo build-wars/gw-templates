@@ -426,12 +426,13 @@ final class PwndTemplate extends TemplateAbstract{
 	 */
 	private function decodeDescription(string $descB64, string $from_encoding):array{
 		$desc = $this->base64decode($descB64);
-		$desc = $this->decodeField($desc, $from_encoding);
 
 		// the LF should always be present, even if both fields are empty
 		if(strlen($desc) <= 1){
 			return ['', ''];
 		}
+
+		$desc = $this->decodeField($desc, $from_encoding);
 
 		// for some reason there was no LF character, we'll assume that whatever the string is as template name
 		if(!str_contains($desc, "\n")){
