@@ -541,7 +541,7 @@ class PwndTemplateTest extends TestCase{
 
 		$code = $pwndTemplate->encode();
 
-		$this::assertSame($pwnd, str_replace('?'.PwndTemplate::PWND_HEADER_COMMENT, '', $code));
+		$this::assertSame($pwnd, str_replace(["\r", '?'.PwndTemplate::PWND_HEADER_COMMENT], '', $code));
 
 		// decode the freshly encoded template and check again
 		$team = $pwndTemplate->decode($code);
