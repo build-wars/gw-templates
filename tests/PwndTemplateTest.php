@@ -16,6 +16,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use function array_column;
+use function str_replace;
 
 /**
  * Tests the `PwndTemplate` class
@@ -23,13 +24,13 @@ use function array_column;
 class PwndTemplateTest extends TestCase{
 
 	/**
-	 * @return array{0: string, 1: string[], 2: string[], 3: string}[]
+	 * @return array{0: string, 1: string[], 2: string[]}[]
 	 */
 	public static function pwndTemplateProvider():array{
 		return [
 			[
 				<<<PWND1
-				pwnd0000?download paw·ned² @ www.gw-tactics.de Copyright numma_cway aka Redeemer
+				pwnd0000
 				>aOwFj0xfzITOMMMHMie4O0k6PxZaPkpxFP9FzSqAA5AAJBAZBApBAJAAACgJIUGxheWVyAMMSAtIFdv
 				dEEKZOAOj4wiM5MXTMm3cZS9dJOu5BpPkppFFEqtEAFEqncAFEaqmAFEaY7/EEaYRIHeqXjEAAACAgIW
 				GFuZHJhATMiAtIFNvUy9TbWl0ZQoZOQNEApwT2zQDmemuhQOIDQEQjoPgp5PCicJCDBR6JzigItw4SQk
@@ -70,26 +71,58 @@ class PwndTemplateTest extends TestCase{
 					'5 - MoP',
 					'7 - E/Mo',
 				],
-				'pwnd0000?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates'."\n".
-				'>aOwFj0xfzITOMMMHMie4O0k6PxZaPkpxFP9FzSqAA5AAJBAZBApBAJAAAEgJAAIUGxheWVyAMMSAtIF'."\n".
-				'dvdEEKZOAOj4wiM5MXTMm3cZS9dJOu5BpPkppFFEqtEAFEqncAFEaqmAFEaY7/EEaYRIHeqXjEAAAEAg'."\n".
-				'AAIWGFuZHJhATMiAtIFNvUy9TbWl0ZQoZOQNEApwT2zQDmemuhQOIDQEQjoPgp5PCicJCDBR6JzigItw'."\n".
-				'4SQkhtDIIyMgJHeqXjEPPgpghmZ9phOzriUAAEIhAAGR3dlbgAOMyAtIFBhbml4CgZOQNDAcw9QvAIg5'."\n".
-				'ZjOkAcQOBoRoPgpZQCikJCXBR6JnrgItw0VQkht3KIywCKHeqXjEQPkpwRNz6TjdMvKSBAAEMAAAHTm9'."\n".
-				'yZ3UAONCAtIEluZXAxCgZOQNDAawDSvAIg5ZrAFgZAEBoRoPgpZQCikJCXBR6JnrgItw0VQkht3KIywC'."\n".
-				'KHeqXjEQPkpwRNz6TjdMvKSBAAEMBAAbUmF6YWggb3IgW01lcmNlbmFyeV0AONSAtIEluZXAyCgbOAhk'."\n".
-				'QkGZIfMzdwQM0qqSzJnw7iBoPgpZRCi8JiYBR6JXsgI7wMWQkhtDLISOALHeqXjELPkZwUP9akeKAAEg'."\n".
-				'JAAHTGl2aWEALNiAtIEJpUAoZOAWiQyhMp7INN5I8Y5wJOOZNBpPkpxUP96Xfq4npI908npIDLropIvV'."\n".
-				'3npIDr7npITFAAAEEBAAbUmF6YWggb3IgW01lcmNlbmFyeV0AONyAtIFJlc3RvCgXOAOiAyk8gNtehzW'."\n".
-				'ilD56MvYpPkp5EFEKuEAFEqncAFEaqmAFEaY7/EEaYBIHiKbkILPkZAIP9akeKAAEgBAAIWmVpIFJpAK'."\n".
-				'OCAtIFNUCgYOABCY4xEAglAj4ngdQVFAQZAoPgpxlne9rPVaYKSPNvMFJYJRmiEKtATRGW7ipI7AAAAA'."\n".
-				'HT2xpYXMBgNSAtIE1vUApzZWNvbmRhcnkgcHJvZmVzc2lvbiBhbmQgZWxpdGUgc2tpbGwgYXJlIGZyZW'."\n".
-				'UsIGJhcmJzIGlzIG9wdGlvbmFsYOgNDwcjvOkk6hWEqtp9H0iaBpPkpBUPbTkiqwmpI900mpIDLbipIv'."\n".
-				'SvmpIDrzmpINBAAAAUWmhlZCBTaGFkb3dob29mAMNyAtIEUvTW8K<',
+				[
+					'Player',
+					'Xandra',
+					'Gwen',
+					'Norgu',
+					'Razah or [Mercenary]',
+					'Livia',
+					'Razah or [Mercenary]',
+					'Zei Ri',
+					'Olias',
+					'Zhed Shadowhoof',
+				],
+				[
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'secondary profession and elite skill are free, barbs is optional',
+					'',
+				],
+				[
+					[4, 0, 1, 1, 0],
+					[0, 0, 4, 0, 0],
+					[1, 0, 4, 1, 0],
+					[1, 4, 0, 0, 0],
+					[1, 4, 0, 1, 0],
+					[4, 0, 1, 1, 0],
+					[0, 4, 0, 1, 0],
+					[4, 0, 0, 1, 0],
+					[0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 4],
+				],
+				[
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+				],
 			],
 			[
 				<<<PWND2
-				pwnd0001?download pawned2 @ memorial.redeemer.biz | Copyright 2008-2018 Redeemer
+				pwnd0001
 				>ZOACiQyiMVNxMNAa5YsdN5DWOBpPkpRIPZzXjq4npI908npIDLtopItV3npIDr7npITFAAAGAhA//PA
 				AGU29TCgZOQNEAqwD2yQDmeDhLQOIDQEQjoPgpxkne9rPVYYKSPNuMFZY5PmicJdATRmBzipItAAAACI
 				hAAIUGFuaXgKZOQNDAcw9QvAIg5ZrAkAcQOBoRoPgpBlne9rPVYYKSPNuMFZYZQmikJdATRmBzipItAA
@@ -121,21 +154,50 @@ class PwndTemplateTest extends TestCase{
 					'BiP/Resto',
 					'ST Prot',
 				],
-				'pwnd0001?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates'."\n".
-				'>ZOACiQyiMVNxMNAa5YsdN5DWOBpPkpRIPZzXjq4npI908npIDLtopItV3npIDr7npITFAAAIAhA//PA'."\n".
-				'AAAGU29TCgZOQNEAqwD2yQDmeDhLQOIDQEQjoPgpxkne9rPVYYKSPNuMFZY5PmicJdATRmBzipItAAAA'."\n".
-				'EIhAAAAIUGFuaXgKZOQNDAcw9QvAIg5ZrAkAcQOBoRoPgpBlne9rPVYYKSPNuMFZYZQmikJdATRmBzip'."\n".
-				'ItAAAAEMAAAAATSW5lcC9FcGlkZW1pYwobOQNEAawD2C9CgAmntCUAmBQEgGBoPgpBlne9rPVYYKSPNu'."\n".
-				'MFZYZQmikJdATRmBzipItAAAAEMBAAAAPSW5lcC9JbnNwaQocOAhkUwG4hEqUMzXgC4Wodg00kTVFoPg'."\n".
-				'phlne9rPVEbKSPNjNFZYZRmusGdYTRGWXspI7AAAAEEIAAAAWRGlzY29yZC9SZXN0byAxCgcOAhkUwG4'."\n".
-				'hEqUMzXgC4Wowj00kTVFoPgphlne9rPVEbKSPNjNFZYZRmusGdYTRGWXspI7AAAAEEIAAAAWRGlzY29y'."\n".
-				'ZC9SZXN0byAyCgcOAhkQoGYIfI0dwQjdAnowj00kTVFoPgpRlnsxSPVEbiWPNjNRbY5QmolGdYT0yBXs'."\n".
-				'Ja7AAAAEYJAAAAOQmlQL1Jlc3RvCgXOAOiAyk8gNtehTLXLB56MvYpPkpxHPZzXto4npI908npIDLnop'."\n".
-				'IxV3npIDr7npITFAAAEgCAAAALU1QgUHJvdAo<',
+				[
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+				],
+				[
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+				],
+				[
+					[0, 0, 4, 1, 0],
+					[1, 0, 4, 1, 0],
+					[1, 4, 0, 0, 0],
+					[1, 4, 0, 1, 0],
+					[0, 4, 1, 0, 0],
+					[0, 4, 1, 0, 0],
+					[3, 0, 1, 1, 0],
+					[4, 0, 0, 2, 0],
+				],
+				[
+					[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+				],
 			],
 			[
 				<<<PWND3
-				pwnd0001?download pawned2 @ memorial.redeemer.biz | Copyright 2008-2018 Redeemer
+				pwnd0001
 				>cOwFkMyd534lkDjzzBjoHuDNZcm+DoPkpxFP9FySqIlpI90MlpIDLfYpI7oMFZpcpMFpoALPkZATPZj
 				lsILPcZg8z6QJpCRPgpgnnN4SJNSauVlCGjLA//PrxMTExMTExMTExMTExMTExMTExMTExMTExMTExMT
 				ExMQFWRU5D1kRJTkctVMRTVAowMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3OD
@@ -157,19 +219,34 @@ class PwndTemplateTest extends TestCase{
 					'',
 					'',
 				],
-				'pwnd0001?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates'."\n".
-				'>cOwFkMyd534lkDjzzBjoHuDNZcm+DoPkpxFP9FySqIlpI90MlpIDLfYpI7oMFZpcpMFpoALPkZATPZj'."\n".
-				'lsILPcZg8z6QJpCRPgpgnnN4SJNSauVlCIjLA//PAArxMTExMTExMTExMTExMTExMTExMTExMTExMTEx'."\n".
-				'MTExMQFWRU5D1kRJTkctVMRTVAowMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3'."\n".
-				'ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIz'."\n".
-				'NDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVm'."\n".
-				'MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFi'."\n".
-				'Y2RlZjAxMjM0NTY3ODlhYmNkZWYwMQQOQBAAAAAAAAAAAAAAAAAIAAA//BAAAACCgQOQBAAAAAAAAAAA'."\n".
-				'AAAAAAAAACCgQOABAAAAAAAAAAAAAAAAAAAACCg<',
+				[
+					'ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ',
+					'',
+					'',
+					'',
+				],
+				[
+					'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01', // phpcs:ignore
+					'',
+					'',
+					'',
+				],
+				[
+					[4, 3, 1, 3, 0],
+					[0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0],
+				],
+				[
+					[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
+					[true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+				],
 			],
 			[
 				<<<PWND4
-				pwnd0002?download pawned2 @ memorial.redeemer.biz | Copyright 2008-2018 Redeemer
+				pwnd0002
 				>cOwFkMyd534lkDjzzBjoHuDNZcm+DoPkpxFP9FySqIlpI90MlpIDLfYpI7oMFZpcpMFpoALPkZATPZj
 				lsILPcZg8z6QJpCRPgpgnnN4SJNSauVlCGjLA//P+w4TDhMOEw4TDhMOEw4TDhMOEw4TDhMOEw4TDhMO
 				Ew4TDhMOEw4TDhMOEw4TDhAFYRU5Dw5ZESU5HLVTDhFNUCjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg
@@ -205,29 +282,225 @@ class PwndTemplateTest extends TestCase{
 					'粵語',
 					'한국어',
 				],
-				'pwnd0002?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates'."\n".
-				'>cOwFkMyd534lkDjzzBjoHuDNZcm+DoPkpxFP9FySqIlpI90MlpIDLfYpI7oMFZpcpMFpoALPkZATPZj'."\n".
-				'lsILPcZg8z6QJpCRPgpgnnN4SJNSauVlCIjLA//PAA+w4TDhMOEw4TDhMOEw4TDhMOEw4TDhMOEw4TDh'."\n".
-				'MOEw4TDhMOEw4TDhMOEw4TDhAFYRU5Dw5ZESU5HLVTDhFNUCjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2N'."\n".
-				'zg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyM'."\n".
-				'zQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZ'."\n".
-				'jAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhY'."\n".
-				'mNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxQOQBAAAAAAAAAAAAAAAAAIAAA//BA'."\n".
-				'Ao5Lit5paH5Lit5paH5Lit5paH5Lit5paH5Lit5paHFU5Lit5paHCuS4reaWh+S4reaWh+S4reaWh+S4'."\n".
-				'reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4'."\n".
-				'reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4'."\n".
-				'reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4'."\n".
-				'reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWh+S4reaWhwAAQOQBAAAAAAAAAAAA'."\n".
-				'AAAAAAo57K16Kqe57K16Kqe57K16Kqe57K16Kqe57K16KqeFU57K16KqeCueyteiqnueyteiqnueytei'."\n".
-				'qnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueytei'."\n".
-				'qnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueytei'."\n".
-				'qnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueytei'."\n".
-				'qnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqnueyteiqngAAQOABAAAAAAA'."\n".
-				'AAAAAAAAAAAo7ZWc6rWt7Ja07ZWc6rWt7Ja07ZWc6rWt7Ja07ZWcFU7ZWc6rWt7Ja0Cu2VnOq1reyWtO'."\n".
-				'2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1re'."\n".
-				'yWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnO'."\n".
-				'q1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO'."\n".
-				'2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtO2VnOq1reyWtAAA<',
+				[
+					'ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ',
+					'中文中文中文中文中文',
+					'粵語粵語粵語粵語粵語',
+					'한국어한국어한국어한',
+				],
+				[
+					'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01', // phpcs:ignore
+					'中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文中文',
+					'粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語粵語',
+					'한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어한국어',
+				],
+				[
+					[4, 3, 1, 3, 0],
+					[0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0],
+					[0, 0, 0, 0, 0],
+				],
+				[
+					[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
+					[true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+				],
+			],
+			[
+				<<<PWND5
+				pwnd0001
+				>dOQAVEZpNNqVNSsGqosYqZuAAAAAAAAAAAGsaIBAOCVwADVwobOgAUcZrhtsRj1bGzG4aAAAAAAAAAA
+				AAElaABCUgADUgobOwAUA5m5snRh1+D4EBEAAAAAAAAAAAAEjVABDTW8AETW8KbOABEYMZldG9VzF4FY
+				VBAAAAAAAAAAAAEjqABCTgADTgobOQBEAcYiNG5VjAO9UBAAAAAAAAAAAAAEsaABDTWUAETWUKcOgBFw
+				Mapp2aEY93ATTvg6AAAAAAAAAAAEjRoBCRQADRQocOwBkMydmn9ZEZtxnwHuDAAAAAAAAAAAAEjVABCQ
+				QADQQocOACkQygWoJaUZN0En4lDAAAAAAAAAAAAEjVABDUnQAEUnQKcOQCkgylmpda0Z9CG9WGGAAAAA
+				AAAAAAAEjVABCUAADUAocOgCkwypmqtakZtAW3n5FAAAAAAAAAAAAEjVABCRAADRAo<
+				PWND5,
+				[
+					'OQAVEZpNNqVNSsGqosYqZuAAAAAAA',
+					'OgAUcZrhtsRj1bGzG4aAAAAAAAA',
+					'OwAUA5m5snRh1+D4EBEAAAAAAAA',
+					'OABEYMZldG9VzF4FYVBAAAAAAAA',
+					'OQBEAcYiNG5VjAO9UBAAAAAAAAA',
+					'OgBFwMapp2aEY93ATTvg6AAAAAAA',
+					'OwBkMydmn9ZEZtxnwHuDAAAAAAAA',
+					'OACkQygWoJaUZN0En4lDAAAAAAAA',
+					'OQCkgylmpda0Z9CG9WGGAAAAAAAA',
+					'OgCkwypmqtakZtAW3n5FAAAAAAAA',
+				],
+				[
+					'W',
+					'R',
+					'Mo',
+					'N',
+					'Me',
+					'E',
+					'A',
+					'Rt',
+					'P',
+					'D',
+				],
+				[
+					'W',
+					'R',
+					'Mo',
+					'N',
+					'Me',
+					'E',
+					'A',
+					'Rt',
+					'P',
+					'D',
+				],
+				[
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',
+				],
+				[
+					[5, 4, 3, 2, 1],
+					[4, 5, 3, 2, 0],
+					[4, 3, 2, 5, 0],
+					[4, 3, 5, 2, 0],
+					[5, 4, 3, 2, 0],
+					[4, 3, 2, 1, 5],
+					[4, 3, 2, 5, 0],
+					[4, 3, 2, 5, 0],
+					[4, 3, 2, 5, 0],
+					[4, 3, 2, 5, 0],
+				],
+				[
+					[true, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true],
+					[true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+				],
+			],
+			[
+				<<<PWND6
+				pwnd0002
+				>ZOACiQyiMVNxMNAa5YsdN5DWOBpPkpRIPZzXjq4npI908npIDLtopItV3npIDr7npITFAAAGAhAAAOo
+				5Lit5paH5Lit5paH5Lit5paH5Lit5paH5Lit5paHFWU29TCjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nz
+				g5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMz
+				Q1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZj
+				AxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYm
+				NkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYgZOQNEAqwD2yQDmeD
+				hLQOIDQEQjoPgpxkne9rPVYYKSPNuMFZY5PmicJdATRmBzipItAPPgpghmZ9phOzriUAAEQjAHo57K16
+				Kqe57K16Kqe57K16Kqe57K16Kqe57K16KqeFWUGFuaXgKMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODl
+				hYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU
+				2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDE
+				yMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2R
+				lZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OQZOQNDAcw9QvAIg5ZrAkAc
+				QOBoRoPgpBlne9rPVYYKSPNuMFZYZQmikJdATRmBzipItAQPkpwRNz6TjdMvKSBAAEUAAHo7ZWc6rWt7
+				Ja07ZWc6rWt7Ja07ZWc6rWt7Ja07ZWcFWSW5lcC9FcGlkZW1pYwowMTIzNDU2Nzg5YWJjZGVmMDEyMzQ
+				1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjA
+				xMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmN
+				kZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg
+				5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMQbOQNEAawD2C9CgAmntCUAmBQE
+				gGBoPgpBlne9rPVYYKSPNuMFZYZQmikJdATRmBzipItAQPkpwRNz6TjdMvKSBAAEUDAHo5Lit5paH5Li
+				t5paH5Lit5paH5Lit5paH5Lit5paHFWSW5lcC9JbnNwaQowMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4O
+				WFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0N
+				TY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwM
+				TIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZ
+				GVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNAcOAhkUwG4hEqUMzXgC4Wodg00kT
+				VFoPgphlne9rPVEbKSPNjNFZYZRmusGdYTRGWXspI7AAAACERo57K16Kqe57K16Kqe57K16Kqe57K16K
+				qe57K16KqeFWRGlzY29yZC9SZXN0byAxCjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEy
+				MzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2Rl
+				ZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlh
+				YmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2
+				Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZgcOAhkUwG4hEqUMzXgC4Wowj00kTVFoPgphlne9rPVEbKSP
+				NjNFZYZRmusGdYTRGWXspI7AAAACEIo7ZWc6rWt7Ja07ZWc6rWt7Ja07ZWc6rWt7Ja07ZWcFWRGlzY29
+				yZC9SZXN0byAyCjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjA
+				xMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmN
+				kZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg
+				5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ
+				1Njc4OWFiY2RlZgcOAhkQoGYIfI0dwQjdAnowj00kTVFoPgpRlnsxSPVEbiWPNjNRbY5QmolGdYT0yBX
+				sJa7AAAACYJo5Lit5paH5Lit5paH5Lit5paH5Lit5paH5Lit5paHFWQmlQL1Jlc3RvCjAxMjM0NTY3OD
+				lhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzND
+				U2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMD
+				EyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2
+				RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NQXOAO
+				iAyk8gNtehTLXLB56MvYpPkpxHPZzXto4npI908npIDLnopIxV3npIDr7npITFAAACgCo57K16Kqe57K
+				16Kqe57K16Kqe57K16Kqe57K16KqeFWU1QgUHJvdAowMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY
+				2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3O
+				DlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzN
+				DU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmM
+				DEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nw<
+				PWND6,
+				[
+					'OACiQyiMVNxMNAa5YsdN5DWOB',
+					'OQNEAqwD2yQDmeDhLQOIDQEQj',
+					'OQNDAcw9QvAIg5ZrAkAcQOBoR',
+					'OQNEAawD2C9CgAmntCUAmBQEgGB',
+					'OAhkUwG4hEqUMzXgC4Wodg00kTVF',
+					'OAhkUwG4hEqUMzXgC4Wowj00kTVF',
+					'OAhkQoGYIfI0dwQjdAnowj00kTVF',
+					'OAOiAyk8gNtehTLXLB56MvY',
+				],
+				[
+					'SoS',
+					'Panix',
+					'Inep/Epidemic',
+					'Inep/Inspi',
+					'Discord/Resto 1',
+					'Discord/Resto 2',
+					'BiP/Resto',
+					'ST Prot',
+				],
+				[
+					'中文中文中文中文中文',
+					'粵語粵語粵語粵語粵語',
+					'한국어한국어한국어한',
+					'中文中文中文中文中文',
+					'粵語粵語粵語粵語粵語',
+					'한국어한국어한국어한',
+					'中文中文中文中文中文',
+					'粵語粵語粵語粵語粵語',
+				],
+				[
+					'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789ab', // phpcs:ignore
+					'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789', // phpcs:ignore
+					'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01', // phpcs:ignore
+					'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01234', // phpcs:ignore
+					'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', // phpcs:ignore
+					'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef', // phpcs:ignore
+					'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef012345', // phpcs:ignore
+					'0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01234567', // phpcs:ignore
+				],
+				[
+					[0, 0, 4, 1, 0],
+					[2, 0, 4, 3, 0],
+					[2, 4, 0, 0, 0],
+					[2, 4, 0, 3, 0],
+					[0, 4, 2, 1, 0],
+					[0, 4, 1, 0, 0],
+					[3, 0, 1, 1, 0],
+					[4, 0, 0, 2, 0],
+				],
+				[
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true],
+					[true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+					[false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false],
+				],
 			],
 		];
 	}
@@ -235,6 +508,10 @@ class PwndTemplateTest extends TestCase{
 	/**
 	 * @param string[] $expectedSkills
 	 * @param string[] $expectedTemplatenames
+	 * @param string[] $expectedPlayers
+	 * @param string[] $expectedDescriptions
+	 * @param int[]    $expectedAttributes
+	 * @param bool[]   $expectedFlags
 	 */
 	#[Test]
 	#[DataProvider('pwndTemplateProvider')]
@@ -242,7 +519,10 @@ class PwndTemplateTest extends TestCase{
 		string $pwnd,
 		array $expectedSkills,
 		array $expectedTemplatenames,
-		string $expectedCode,
+		array $expectedPlayers,
+		array $expectedDescriptions,
+		array $expectedAttributes,
+		array $expectedFlags,
 	):void{
 		// first decode and compare
 		$team = (new PwndTemplate)->decode($pwnd);
@@ -261,13 +541,17 @@ class PwndTemplateTest extends TestCase{
 
 		$code = $pwndTemplate->encode();
 
-		$this::assertSame($expectedCode, $code);
+		$this::assertSame($pwnd, str_replace('?'.PwndTemplate::PWND_HEADER_COMMENT, '', $code));
 
 		// decode the freshly encoded template and check again
 		$team = $pwndTemplate->decode($code);
 
 		$this::assertSame($expectedSkills, array_column($team, 'skills'));
 		$this::assertSame($expectedTemplatenames, array_column($team, 'templatename'));
+		$this::assertSame($expectedDescriptions, array_column($team, 'description'));
+		$this::assertSame($expectedPlayers, array_column($team, 'player'));
+		$this::assertSame($expectedAttributes, array_column($team, 'attributes'));
+		$this::assertSame($expectedFlags, array_column($team, 'flags'));
 	}
 
 }

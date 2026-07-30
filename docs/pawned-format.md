@@ -71,11 +71,12 @@ The additional weaponsets are 3 fields, each processed in the same way as the eq
 
 ### Flags
 
-The flags field is preceded by one byte length information, fillowed by a base64-encoded string that is decoded it the same way as the template codes.
+The flags field is preceded by one byte length information, followed by a base64-like string with a maximum length of 6 bytes (representing 6 bits each), 3 bytes attribute bonus and 3 bytes flags.
+The data is read directly from the base64-ordinals, where the attribute bytes are interpreted as little-endian, and the flag bytes as big-endian integers.
 
 #### Attribute bonuses
 
-The first 15 bits are attribute bonuses for display in the UI, 5 times 3 bits (a maximum of bonus value of 7) for each attribute of the primary profession ordered by attribute ID (with exception of the primary attribute which is always the first value), followed by 3 empty bits.
+The first 15 bits are attribute bonuses for display in the UI, 5 times 3 bits (a maximum of bonus value of 7) for each attribute of the primary profession ordered by attribute ID, followed by 3 empty bits.
 
 #### Flags
 

@@ -14,12 +14,14 @@ namespace BuildWars\GWTemplates;
 use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
+use function array_chunk;
 use function array_fill;
 use function array_key_exists;
 use function array_keys;
 use function array_map;
 use function array_sum;
 use function array_values;
+use function base64_decode;
 use function boolval;
 use function count;
 use function explode;
@@ -27,10 +29,9 @@ use function implode;
 use function intdiv;
 use function intval;
 use function is_string;
-use function max;
 use function mb_detect_encoding;
 use function mb_internal_encoding;
-use function min;
+use function rtrim;
 use function sprintf;
 use function str_contains;
 use function str_replace;
@@ -50,6 +51,8 @@ use function trim;
  * @link https://memorial.redeemer.biz/pawned2/
  */
 final class PwndTemplate extends TemplateAbstract{
+
+	public const PWND_HEADER_COMMENT = 'pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates';
 
 	public const PAWNED_CHARSET_UNDEFINED   = 0;
 	public const PAWNED_CHARSET_WINDOWS1252 = 1;
@@ -119,29 +122,8 @@ final class PwndTemplate extends TemplateAbstract{
 #		self::MOD_OF_THE_DERVISH      => 'buOffTheDervish',
 	];
 
-	/**
-	 * Map of profession => UI/flag attribute order
-	 *
-	 * (primary attribute first, followed by the other attributes)
-	 *
-	 * @var array<int, int[]>
-	 */
-	public const ATTRIBUTE_ORDER = [
-		1  => [17, 18, 19, 20, 21],
-		2  => [23, 22, 24, 25],
-		3  => [16, 13, 14, 15],
-		4  => [6, 4, 5, 7],
-		5  => [0, 1, 2, 3],
-		6  => [12, 8, 9, 10, 11],
-		7  => [35, 29, 30, 31],
-		8  => [36, 32, 33, 34],
-		9  => [40, 37, 38, 39],
-		10 => [44, 41, 42, 43],
-	];
-
-	private const PWND_HEADER_PREFIX  = 'pwnd';
-	private const PWND_HEADER_COMMENT = 'pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates';
-	private const BASE64              = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+	private const PWND_HEADER_PREFIX = 'pwnd';
+	private const BASE64             = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 	/**
 	 * @var array{skills: string, equipment: string, weaponsets: string[], flags: string, player: string, description: string}[]
@@ -216,7 +198,7 @@ final class PwndTemplate extends TemplateAbstract{
 		$encoding    = self::getEncoding($headerFlags[3]);
 
 		// find the template string
-		$pwnd  = str_replace(["\r", "\n"], '', trim($pwnd));
+		$pwnd  = str_replace(["\r", "\n", "\t"], '', trim($pwnd));
 		$start = strrpos($pwnd, '>'); // maybe not the best idea... (better than reading from the start tho)
 		$end   = strpos($pwnd, '<', $start);
 
@@ -481,16 +463,33 @@ final class PwndTemplate extends TemplateAbstract{
 			];
 		}
 
-		$bin8     = $this->base64decode($flagsB64);
-		$base2    = $this->decodeBinaryToBase2($bin8);
-		$bonuses  = array_map($this->bindec_flip(...), str_split(substr($base2, 0, 15), 3));
-		// the flag string might not always be complete
-		$flag_val = str_split(substr($base2, 18, 16));
+		$bonuses = [];
+		$flag_b2 = '';
 
-		$flags = [];
+		// we're reading a maximum of 6 bytes (6 bits each, for a total of 36 - the flag length is 34 bits)
+		// the first 3 bytes for attribute bonuses
+		for($i = 0; $i < 6; $i++){
+			// we're going to zero-fill here
+			$ord = $this->base64_ord(($flagsB64[$i] ?? 'A'));
+
+			if($i < 3){
+				$bonuses[] = (($ord & 0b111000) >> 3);
+				$bonuses[] = ($ord & 0b000111);
+			}
+			// the bytes for the consumable flags are read as big-endian, aka we need to flip them
+			else{
+				$flag_b2 .= $this->decbin_pad($ord, 6);
+			}
+		}
+
+		// the last value is unused and always 0
+		unset($bonuses[5]);
+
+		$flag_val = str_split($flag_b2);
+		$flags    = [];
 
 		foreach(array_keys(self::FLAGS) as $flag){
-			$flags[$flag] = isset($flag_val[$flag]) && boolval($flag_val[$flag]) === true;
+			$flags[$flag] = boolval($flag_val[$flag]);
 		}
 
 		return [$bonuses, $flags];
@@ -508,26 +507,32 @@ final class PwndTemplate extends TemplateAbstract{
 			return '';
 		}
 
-		$bin = '';
-
-		// write 5 times 3 bits
-		for($i = 0; $i < 5; $i++){
-			$bin .= $this->decbin_pad(max(0, min(intval($attributes[$i] ?? 0), 7)), 3);
+		// zero-fill possibly missing values
+		while(count($attributes) < 6){ // phpcs:ignore
+			$attributes[] = 0;
 		}
 
-		// add 3 empty bits as terminator
-		$bin .= '000';
+		$b64 = '';
+
+		// combine 2 times 3 bits each
+		foreach(array_chunk($attributes, 2) as [$hi, $lo]){
+			$b64 .= $this->base64_chr(($hi << 3) | $lo);
+		}
 
 		// we'll only write flags if any of them are set
 		if($flag_sum > 0){
+			$base2 = '';
+
 			foreach(array_keys(self::FLAGS) as $flag){
-				$bin .= (int)(isset($flags[$flag]) && boolval($flags[$flag]) === true);
+				$base2 .= (int)(isset($flags[$flag]) && boolval($flags[$flag]) === true);
 			}
+
+			$bin  = $this->encodeBase2ToBinary($base2);
+			$b64 .= $this->base64encode($bin);
 		}
 
-		$bin = $this->encodeBase2ToBinary($bin);
-
-		return $this->base64encode($bin);
+		// cut off unnecessary zero padding
+		return rtrim($b64, 'A');
 	}
 
 	/**
@@ -539,7 +544,7 @@ final class PwndTemplate extends TemplateAbstract{
 		$internal_encoding = mb_internal_encoding();
 
 		if($data === '' || $from_encoding === $internal_encoding){
-			return $data;
+			return trim($data);
 		}
 
 		if($from_encoding === 'undefined'){
@@ -667,6 +672,15 @@ final class PwndTemplate extends TemplateAbstract{
 		$this->offset += $length;
 
 		return $dec;
+	}
+
+	/**
+	 * Standard base64-decode to avoid some issues with unpadded strings (Sodium is a bit too strict here)
+	 */
+	protected function base64decode(string $base64):string{
+		$base64 = $this->checkCharacterSet($base64);
+
+		return base64_decode($base64, true);
 	}
 
 }
