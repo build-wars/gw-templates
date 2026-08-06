@@ -4,9 +4,7 @@
  * @copyright    2024 smiley
  * @license      MIT
  */
-
 import TemplateAbstract from './TemplateAbstract.js';
-import {ATTR_TO_PROF, PROF_TO_PRI, TEMPLATE_SKILL_NEW} from './constants.js';
 import PHPJS from './PHPJS.js';
 
 /**
@@ -15,6 +13,24 @@ import PHPJS from './PHPJS.js';
  * @final
  */
 export default class SkillTemplate extends TemplateAbstract{
+
+	/**
+	 * profession id => primary attribute id
+	 */
+	#PROF_TO_PRI = {
+		'1' : 17, '2' : 23, '3' : 16, '4' : 6, '5' : 0, '6' : 12, '7' : 35, '8' : 36, '9' : 40, '10': 44,
+	};
+
+	/**
+	 * attribute id => profession id
+	 */
+	#ATTR_TO_PROF = {
+		'0' : 5, '1' : 5, '2' : 5, '3' : 5, '4' : 4, '5' : 4, '6' : 4, '7' : 4, '8' : 6, '9' : 6,
+		'10': 6, '11': 6, '12': 6, '13': 3, '14': 3, '15': 3, '16': 3, '17': 1, '18': 1, '19': 1,
+		'20': 1, '21': 1, '22': 2, '23': 2, '24': 2, '25': 2, '29': 7, '30': 7, '31': 7, '32': 8,
+		'33': 8, '34': 8, '35': 7, '36': 8, '37': 9, '38': 9, '39': 9, '40': 9, '41': 10, '42': 10,
+		'43': 10, '44': 10,
+	};
 
 	/**
 	 * Decodes the given skill template into an array
@@ -31,32 +47,30 @@ export default class SkillTemplate extends TemplateAbstract{
 	 * @returns {*}
 	 */
 	decode($template){
-		let bin    = this.decodeTemplate($template);
-		let offset = 0;
-
-		let read = ($length) => this.bindec_flip(bin.substring(offset, (offset += $length)));
+		this.string = this.decodeTemplate($template);
+		this.offset = 0;
 
 		// profession length code, seems to be unused and will always be 00
-		let pl    = read(2);
+		let pl    = this.read(2);
 		// primary profession id
-		let pri   = read(4);
+		let pri   = this.read(4);
 		// secondary profession id
-		let sec   = read(4);
+		let sec   = this.read(4);
 		// attribute count
-		let attrc = read(4);
+		let attrc = this.read(4);
 		// attribute id length code
-		let attrl = (read(4) + 4);
+		let attrl = (this.read(4) + 4);
 
 		let attributes = {};
 
 		// get the attributes
 		for(let i = 0; i < attrc; i++){
-			attributes[read(attrl)] = read(4);
+			attributes[this.read(attrl)] = this.read(4);
 		}
 
 		// get the skillbar
-		let skill_id_len = (read(4) + 8);
-		let skills       = [0, 0, 0, 0, 0, 0, 0, 0].map(() => read(skill_id_len));
+		let skill_id_len = (this.read(4) + 8);
+		let skills       = [0, 0, 0, 0, 0, 0, 0, 0].map(() => this.read(skill_id_len));
 
 		return {code: $template, prof_pri: pri, prof_sec: sec, attributes: attributes, skills: skills};
 	}
@@ -77,7 +91,7 @@ export default class SkillTemplate extends TemplateAbstract{
 
 		// start of the binary string:
 		// type (14,4)
-		let $bin = this.decbin_pad(TEMPLATE_SKILL_NEW, 4);
+		let $bin = this.decbin_pad(this.TEMPLATE_SKILL_NEW, 4);
 		// version (0,4)
 		$bin += this.decbin_pad(0, 4);
 		// profession length code (0,2)
@@ -122,11 +136,11 @@ export default class SkillTemplate extends TemplateAbstract{
 	 */
 	normalizeProfessions($pri, $sec){
 
-		if(PROF_TO_PRI[$pri.toString()] === undefined){
+		if(this.#PROF_TO_PRI[$pri.toString()] === undefined){
 			$pri = 0;
 		}
 
-		if(PROF_TO_PRI[$sec.toString()] === undefined || $sec === $pri){
+		if(this.#PROF_TO_PRI[$sec.toString()] === undefined || $sec === $pri){
 			$sec = 0;
 		}
 
@@ -149,11 +163,11 @@ export default class SkillTemplate extends TemplateAbstract{
 		for(let id in $attributes){
 
 			// exclude invalid attributes
-			if(ATTR_TO_PROF[id] === undefined){
+			if(this.#ATTR_TO_PROF[id] === undefined){
 				continue;
 			}
 
-			let profession = ATTR_TO_PROF[id];
+			let profession = this.#ATTR_TO_PROF[id];
 
 			// attribute profession is neither primary or secondary
 			if(profession !== $pri && profession !== $sec){
@@ -163,7 +177,7 @@ export default class SkillTemplate extends TemplateAbstract{
 			// primary attribute of secondary profession
 			let sec = $sec.toString(); // object key weirdness
 
-			if(PROF_TO_PRI[sec] !== undefined && profession === PROF_TO_PRI[sec]){
+			if(this.#PROF_TO_PRI[sec] !== undefined && profession === this.#PROF_TO_PRI[sec]){
 				continue;
 			}
 

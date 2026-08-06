@@ -4,8 +4,8 @@
  * @copyright    2024 smiley
  * @license      MIT
  */
+import {EquipmentTemplate} from '../../es6/index.js';
 
-import {EquipmentTemplate} from '../es6/index.js';
 import {beforeEach, suite, test} from 'mocha';
 import {assert} from 'chai';
 

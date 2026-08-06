@@ -4,8 +4,8 @@
  * @copyright    2024 smiley
  * @license      MIT
  */
+import {PwndTemplate} from '../../es6/index.js';
 
-import {PwndTemplate} from '../es6/index.js';
 import {beforeEach, suite, test} from 'mocha';
 import {assert} from 'chai';
 
@@ -51,7 +51,7 @@ suite('SkillTemplateTest', function(){
 				'OABCY4xEAglAj4ngdQVFAQZA',
 				'OgNDwcjvOkk6hWEqtp9H0iaB',
 			],
-			'pwnd0001?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates\r\n' +
+			'pwnd0002?pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates\r\n' +
 			'>aOwFj0xfzITOMMMHMie4O0k6PxZaPkpxFP9FzSqAA5AAJBAZBApBAJAAAAIUGxheWVyAMMSAtIFdvdE\r\n' +
 			'EKZOAOj4wiM5MXTMm3cZS9dJOu5BpPkppFFEqtEAFEqncAFEaqmAFEaY7/EEaYRIHeqXjEAAAAIWGFuZ\r\n' +
 			'HJhATMiAtIFNvUy9TbWl0ZQoZOQNEApwT2zQDmemuhQOIDQEQjoPgp5PCicJCDBR6JzigItw4SQkhtDI\r\n' +

@@ -4,11 +4,10 @@
  * @copyright    2024 smiley
  * @license      MIT
  */
-
 import TemplateAbstract from './TemplateAbstract.js';
 import PHPJS from './PHPJS.js';
 
-const PWND_PREFIX = 'pwnd0001';
+const PWND_PREFIX = 'pwnd0002';
 const PWND_HEADER = 'pwnd-encoder by @codemasher: https://github.com/build-wars/gw-templates';
 
 /**
@@ -18,11 +17,15 @@ const PWND_HEADER = 'pwnd-encoder by @codemasher: https://github.com/build-wars/
  *
  * @link https://memorial.redeemer.biz/pawned2/
  *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/Encoding_API
+ *
  * @final
  */
 export default class PwndTemplate extends TemplateAbstract{
 
-	builds = [];
+	#BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+	#builds = [];
 
 	/**
 	 * Decodes the given paw-ned² template into an array
@@ -34,8 +37,8 @@ export default class PwndTemplate extends TemplateAbstract{
 		let start = $pwnd.indexOf('>');
 		let end   = $pwnd.indexOf('<', start);
 
-		if($pwnd.substring(0, 7) !== 'pwnd000' || start === -1 || end === -1 || end <= start){
-			throw new Error('invalid pwnd template');
+		if($pwnd.substring(0, 4) !== 'pwnd' || start === -1 || end === -1 || end <= start){
+			throw new Error('invalid paw·ned² template');
 		}
 
 //		let header = $pwnd.substring(0, start);
@@ -86,7 +89,7 @@ export default class PwndTemplate extends TemplateAbstract{
 		let write = ($str) => (this.base64_chr($str.length) + $str);
 		let pwnd  = '';
 
-		for(let build of this.builds){
+		for(let build of this.#builds){
 			pwnd += write(build.skills);
 			pwnd += write(build.equipment);
 
@@ -120,7 +123,7 @@ export default class PwndTemplate extends TemplateAbstract{
 	 */
 	addBuild($skills, $equipment = null, $weaponsets = [], $player = null, $description = null, $slotname = null){
 
-		this.builds.push({
+		this.#builds.push({
 			skills     : this.checkCharacterSet($skills),
 			equipment  : this.checkCharacterSet($equipment ?? ''),
 			weaponsets : this.normalizeWeaponsets($weaponsets),
@@ -138,7 +141,7 @@ export default class PwndTemplate extends TemplateAbstract{
 	 * @returns {PwndTemplate}
 	 */
 	clearBuilds(){
-		this.builds = [];
+		this.#builds = [];
 
 		return this;
 	}
@@ -189,14 +192,37 @@ export default class PwndTemplate extends TemplateAbstract{
 	}
 
 	/**
-	 * Encode a string to base64
+	 * Returns the ordinal for the given base64 character
 	 *
-	 * @param {string} $string
-	 * @returns {string}
-	 * @private
+	 * @param {string} $chr
+	 * @returns {number|int}
+	 * @protected
 	 */
-	base64encode($string){
-		return btoa($string).replace(/=+$/, '');
+	base64_ord($chr){
+		let $ord = this.#BASE64.indexOf($chr);
+
+		if($ord === -1){
+			throw new Error('invalid base64 character');
+		}
+
+		return $ord;
 	}
+
+	/**
+	 * Returns the base64 character for the given ordinal
+	 *
+	 * @param {number|int} $ord
+	 * @returns {string}
+	 * @protected
+	 */
+	base64_chr($ord){
+
+		if($ord < 0 || $ord > 63){
+			throw new Error('invalid base64 ordinal');
+		}
+
+		return this.#BASE64.substring($ord, $ord + 1)
+	}
+
 
 }

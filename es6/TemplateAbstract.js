@@ -4,10 +4,7 @@
  * @copyright    2024 smiley
  * @license      MIT
  */
-import {TEMPLATE_EQUIPMENT_NEW, TEMPLATE_EQUIPMENT_OLD, TEMPLATE_SKILL_NEW, TEMPLATE_SKILL_OLD} from './constants.js';
 import PHPJS from './PHPJS.js';
-
-const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 /**
  * Abstract Guild Wars template encoding/decoding
@@ -15,6 +12,14 @@ const BASE64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/
  * @abstract
  */
 export default class TemplateAbstract{
+
+	get TEMPLATE_SKILL_OLD    (){return 0b0000}
+	get TEMPLATE_SKILL_NEW    (){return 0b1110}
+	get TEMPLATE_EQUIPMENT_OLD(){return 0b0001}
+	get TEMPLATE_EQUIPMENT_NEW(){return 0b1111}
+
+	offset = 0;
+	string = '';
 
 	/**
 	 * Reverses the given binary number string and converts it to an integer
@@ -52,36 +57,26 @@ export default class TemplateAbstract{
 	}
 
 	/**
-	 * Returns the ordinal for the given base64 character
+	 * Checks if the given string is a valid base64 string
 	 *
-	 * @param {string} $chr
-	 * @returns {number|int}
-	 * @protected
-	 */
-	base64_ord($chr){
-		let $ord = BASE64.indexOf($chr);
-
-		if($ord === -1){
-			throw new Error('invalid base64 character');
-		}
-
-		return $ord;
-	}
-
-	/**
-	 * Returns the base64 character for the given ordinal
-	 *
-	 * @param {number|int} $ord
+	 * @param {string} $base64
 	 * @returns {string}
 	 * @protected
 	 */
-	base64_chr($ord){
+	checkCharacterSet($base64){
+		// nasty fix for urlencode and padded strings
+		$base64 = $base64.trim().replaceAll(' ', '+').replaceAll('=', '');
 
-		if($ord < 0 || $ord > 63){
-			throw new Error('invalid base64 ordinal');
+		if($base64 === ''){
+			return '';
 		}
 
-		return BASE64.substring($ord, $ord + 1)
+		// noinspection RegExpRedundantEscape
+		if($base64.match(/^[A-Za-z0-9\+\/]*$/) === null){
+			throw new Error('Base64 must match RFC3548 character set');
+		}
+
+		return $base64;
 	}
 
 	/**
@@ -103,82 +98,119 @@ export default class TemplateAbstract{
 	}
 
 	/**
-	 * Checks if the given string is a valid base64 string
+	 * @param {string} $base64
+	 * @returns {string}
+	 */
+	base64decode($base64){
+		$base64 = this.checkCharacterSet($base64);
+
+		// we're gonna add zeroes until the bit count is divisible by 8
+		while(($base64.length % 8) !== 0){
+			$base64 += 'A';
+		}
+
+		return atob($base64);
+	}
+
+	/**
+	 * @param {string} $string
+	 * @returns {string}
+	 */
+	base64encode($string){
+		return btoa($string).replaceAll('=', '');
+	}
+
+	/**
+	 * @param {number|int} $length
+	 * @returns {number|int}
+	 */
+	read($length){
+		let $dec = this.bindec_flip(this.string.substring(this.offset, (this.offset + $length)));
+		this.offset += $length;
+
+		return $dec;
+	}
+
+	/**
+	 * Decodes a template from the base64 format into a binary number (base2) string
 	 *
 	 * @param {string} $base64
 	 * @returns {string}
 	 * @protected
 	 */
-	checkCharacterSet($base64){
-		// nasty fix for urlencode and padded strings
-		$base64 = $base64.trim().replace(' ', '+').replace('=', '');
+	decodeTemplate($base64){
 
 		if($base64 === ''){
-			return '';
-		}
-
-		if($base64.match(/^[A-Za-z0-9+\/]*$/) === null){
-			throw new Error('Base64 must match RFC3548 character set');
-		}
-
-		return $base64;
-	}
-
-	/**
-	 * Decodes a template from the base64 format into a binary number string
-	 *
-	 * @param {string} $template
-	 * @returns {string}
-	 * @protected
-	 */
-	decodeTemplate($template){
-		$template = this.checkCharacterSet($template);
-
-		if($template === ''){
 			throw new Error('invalid base64 template');
 		}
 
-		let $bin = $template
-			.split('')
-			.map($char => this.decbin_flip(this.base64_ord($char)).padEnd(6, '0'))
-			.join('')
-		;
-
-		switch(this.bindec_flip($bin.substring(0, 4))){
-			case TEMPLATE_SKILL_NEW:
-			case TEMPLATE_EQUIPMENT_NEW:
-				return $bin.substring(8);
-			case TEMPLATE_SKILL_OLD:
-			case TEMPLATE_EQUIPMENT_OLD:
-				return $bin.substring(4);
+		// decode the template into 8-bit characters (unsigned char)
+		let chars = this.base64decode($base64);
+		let base2 = this.decodeBinaryToBase2(chars);
+		// get the first 4 bits and decide what to do
+		switch(this.bindec_flip(base2.substring(0, 4))){
+			// new format, remove leading template type and version number
+			case this.TEMPLATE_SKILL_NEW:
+			case this.TEMPLATE_EQUIPMENT_NEW:
+				return base2.substring(8);
+			// old format prior to April 5, 2007, remove version number
+			case this.TEMPLATE_SKILL_OLD:
+			case this.TEMPLATE_EQUIPMENT_OLD:
+				return base2.substring(4);
 		}
 
 		throw new Error('invalid template');
 	}
 
 	/**
-	 * Encodes a binary number template to base64 format
+	 * Encodes a binary number (base2) template to base64 format
 	 *
-	 * @param {string} $bin
+	 * @param {string} $base2
 	 * @returns {string}
 	 * @protected
 	 */
-	encodeTemplate($bin){
+	encodeTemplate($base2){
 
-		if($bin === ''){
+		if($base2 === ''){
 			throw new Error('invalid binary template');
 		}
 
-		// fill the string with zeroes until it is divisible by 6 and 8 (PHP base64_decode compatibility)
-		while($bin.length % 8 !== 0 || $bin.length % 6 !== 0){
-			$bin += '0';
-		}
+		let $bin8 = this.encodeBase2ToBinary($base2);
+		// convert to base64
+		return this.base64encode($bin8);
+	}
 
-		return PHPJS.str_split($bin, 6)
-			.map(this.bindec_flip)
-			.map(this.base64_chr)
-			.join('')
-		;
+	/**
+	 * Decodes the given raw 8-bit binary (unsigned char) string from the decoded base64
+	 * into a base2 string suitable for reading the template data.
+	 *
+	 * @see https://wiki.guildwars.com/wiki/Talk:Skill_template_format#I_don't_get_it
+	 */
+	decodeBinaryToBase2($chars){
+		// unpack the string from unsigned char
+		let $uint8 = $chars.split('').map(c => c.charCodeAt(0));
+		// base convert 10 to 2 (8 bits each value, zero padded to the left)
+		let $bin8  = $uint8.map(o => o.toString(2).padStart(8, '0')).join('');
+		// now split the string into chunks of 6 bits and reverse each chunk
+		let $bin6  = PHPJS.str_split($bin8, 6).map(c => c.split('').reverse().join(''));
+		// glue the string back together and return the result
+		return $bin6.join('');
+	}
+
+	/**
+	 * Encodes the given base2 template data string into an 8-bit binary string.
+	 */
+	encodeBase2ToBinary($base2){
+		// fill the string with zeroes until it is divisible by 6 and 8
+		while($base2.length % 8 !== 0 || $base2.length % 6 !== 0){
+			$base2 += '0';
+		}
+		// split into chunks of 6 and reverse each block
+		let $bin6  = PHPJS.str_split($base2, 6).map(c => c.split('').reverse().join(''));
+		// split the string into chunks of 8 and base convert each chunk from 2 to 10
+		let $uint8 = PHPJS.str_split($bin6.join(''), 8).map(b => PHPJS.intval(b, 2));
+		// convert the uint8 into an 8-bit binary string (unsigned char)
+		return $uint8.map(o => String.fromCharCode(o)).join('');
 	}
 
 }
