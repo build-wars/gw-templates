@@ -116,7 +116,7 @@ abstract class TemplateAbstract{
 		$base64 = $this->checkCharacterSet($base64);
 
 		// PHP's sodium base64 decode is a bit picky, so we're gonna add zeroes until the bit count is divisible by 8
-		while((strlen($base64) % 4) !== 0){ // phpcs:ignore
+		while((strlen($base64) % 8) !== 0){ // phpcs:ignore
 			$base64 .= 'A';
 		}
 
