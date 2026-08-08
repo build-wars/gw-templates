@@ -59,7 +59,7 @@ composer require buildwars/gw-templates
 {
 	"require": {
 		"php": "^8.1",
-		"buildwars/gw-templates": "^1.0"
+		"buildwars/gw-templates": "^1.1"
 	}
 }
 ```
@@ -77,47 +77,61 @@ npm install @buildwars/gw-templates
 ```json
 {
 	"dependencies": {
-		"@buildwars/gw-templates": "^1.0"
+		"@buildwars/gw-templates": "^1.1"
 	}
 }
 ```
 
+### Direct include
+
+You can also directly include the library in your HTML:
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"/>
+	<!-- ... -->
+</head>
+<body>
+	<!-- include the script at the bottom of the html body -->
+	<script type="module">
+		// import the script
+		import * as templates from 'https://build-wars.github.io/gw-templates/js/gw-templates-es6.js';
+		// alternative via unpkg
+		// import * as templates from 'https://unpkg.com/@buildwars/gw-templates@1.1.0/dist/gw-templates-es6.js';
+
+		// do stuff
+	</script>
+</body>
+</html>
+```
+
+Please note that the include from GitHub pages represents the development version, which is built on each push to the main branch. Use NPM or unpkg instead for stable versions.
+
+
 ## Usage
 
-### Skill templates
+### Decode Skill Templates
 
-**Encode**
-
-```php
-$code = (new SkillTemplate)->encode(
-	prof_pri:   7,
-	prof_sec:   1,
-	attributes: [29 => 12, 31 => 3, 35 => 12],
-	skills:     [782, 780, 775, 1954, 952, 2356, 1649, 1018],
-);
-// -> base64 skill template
-```
-
-```js
-let code = new SkillTemplate().encode(
-	7,
-	1,
-	{'29': 12, '31': 3, '35': 12},
-	[782, 780, 775, 1954, 952, 2356, 1649, 1018],
-);
-// -> base64 skill template
-```
-
-**Decode**
-
+**PHP**
 ```php
 $skills = (new SkillTemplate)->decode('OwFj0xfzITOMMMHMie4O0kxZ6PA');
+// static convenience methods:
+$skills = SkillTemplate::fromTemplate('OwFj0xfzITOMMMHMie4O0kxZ6PA');
+$skills = SkillTemplate::fromChatCode('[My Cool Build;OwFj0xfzITOMMMHMie4O0kxZ6PA]');
 ```
 
+**JavaScript :coffee:**
 ```js
 let skills = new SkillTemplate().decode('OwFj0xfzITOMMMHMie4O0kxZ6PA');
+// static convenience methods:
+skills = SkillTemplate.fromTemplate('OwFj0xfzITOMMMHMie4O0kxZ6PA');
+skills = SkillTemplate.fromChatCode('[My Cool Build;OwFj0xfzITOMMMHMie4O0kxZ6PA]');
 ```
 
+#### Return
+
+A call to the `decode()` method returns an array (PHP) or object (JS) similar to the following:
 ```
 Array
 (
@@ -144,51 +158,55 @@ Array
 )
 ```
 
-Please note that the codes might not necessarily match between decode/encode.
 
+### Encode Skill Templates
 
-### Equipment templates
-
-**Encode**
-
+**PHP**
 ```php
-$equipmentTemplate = new EquipmentTemplate;
-
-// add items (will overwrite previous items with same slot id)
-$equipmentTemplate->addItem(
-	id:    279,
-	color: 0,
-	mods:  [190, 204, 329],
+$code = (new SkillTemplate)->encode(
+	prof_pri:   7,
+	prof_sec:   1,
+	attributes: [29 => 12, 31 => 3, 35 => 12],
+	skills:     [782, 780, 775, 1954, 952, 2356, 1649, 1018],
 );
-
-// ... add more items
-
-$code = $equipmentTemplate->encode(); // -> base64 equipment template
+// -> base64 skill template
 ```
 
+**JavaScript :coffee:**
 ```js
-let equipmentTemplate = new EquipmentTemplate();
-
-// add iems (will overwrite previous items with same slot id)
-equipmentTemplate.addItem(279, 0, [190, 204, 329]);
-
-// ... add more items
-
-let code = equipmentTemplate.encode(); // -> base64 equipment template
+let code = new SkillTemplate().encode(
+	7,
+	1,
+	{'29': 12, '31': 3, '35': 12},
+	[782, 780, 775, 1954, 952, 2356, 1649, 1018],
+);
+// -> base64 skill template
 ```
 
-**Decode**
+Please note that the base64 template codes might not necessarily match between decode/encode.
 
+
+### Decode Equipment Templates
+
+**PHP**
 ```php
 $equipment = (new EquipmentTemplate)->decode('PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF');
+// static convenience methods:
+$equipment = EquipmentTemplate::fromTemplate('PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF');
+$equipment = EquipmentTemplate::fromChatCode('[My Cool Equipment;PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF]');
 ```
 
+**JavaScript :coffee:**
 ```js
 let equipment = new EquipmentTemplate().decode('PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF');
+// static convenience methods:
+equipment = EquipmentTemplate.fromTemplate('PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF');
+equipment = EquipmentTemplate.fromChatCode('[My Cool Equipment;PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF]');
 ```
 
-Note: the keys of the returned array are the slot IDs (0-6) - they may not be sequential or ordered
+#### Return
 
+A call to the `decode()` method returns an array (PHP) or object (JS) similar to the following:
 ```
 Array
 (
@@ -208,45 +226,41 @@ Array
     ...more items...
 )
 ```
+Note: the keys of the returned array are the slot IDs (0-6) - they may not be sequential or ordered
 
 
-### paw·ned² templates
+### Encode Equipment Templates
 
-**Encode**
-
+**PHP**
 ```php
-$pwndTemplate = new PwndTemplate;
+$equipmentTemplate = new EquipmentTemplate;
 
-$pwndTemplate->addBuild(
-	skills:      'OwFj0xfzITOMMMHMie4O0kxZ6PA',
-	equipment:   'PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF',
-	weaponsets:  ['PcZQ8zoRpkC'],
-	player:      '<assigned player/hero>',
-	description: "<build name>\r\n<description>",
+// add items (will overwrite previous items with same slot id)
+$equipmentTemplate->addItem(
+	id:    279,
+	color: 0,
+	mods:  [190, 204, 329],
 );
 
-// add more builds (up to 12)
+// ... add more items
 
-$pwnd = $pwndTemplate->encode(); // -> pwnd template code
+$code = $equipmentTemplate->encode(); // -> base64 equipment template
 ```
 
+**JavaScript :coffee:**
 ```js
-let pwndTemplate = new PwndTemplate();
+let equipmentTemplate = new EquipmentTemplate();
 
-pwndTemplate.addBuild(
-	'OwFj0xfzITOMMMHMie4O0kxZ6PA',
-	'PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF',
-	['PcZQ8zoRpkC'],
-	'<assigned player/hero>',
-	'<build name>\r\n<description>',
-);
+// add iems (will overwrite previous items with same slot id)
+equipmentTemplate.addItem(279, 0, [190, 204, 329]);
 
-// add more builds (up to 12)
+// ... add more items
 
-let pwnd = pwndTemplate.encode(); // -> pwnd template code
+let code = equipmentTemplate.encode(); // -> base64 equipment template
 ```
 
-**Decode**
+
+### Decode paw·ned² Templates
 
 The paw-ned² template:
 
@@ -268,34 +282,114 @@ OgNDwcjvOkk6hWEqtp9H0iaBpPkpBUPbTkiqwmpI900mpIDLbipIvSvmpIDrzmpINBAAADAAgAAMNyAt
 IEUvTW8K<
 ```
 
+**PHP**
 ```php
 $team = (new PwndTemplate)->decode($pwnd);
+// static convenience method:
+$team = PwndTemplate::fromTemplate($pwnd);
 ```
 
+**JavaScript :coffee:**
 ```js
 let team = new PwndTemplate().decode(pwnd);
+// static convenience method:
+team = PwndTemplate.fromTemplate($pwnd);
 ```
 
+#### Return
+
+A call to the `decode()` method returns an array (PHP) or object (JS) similar to the following:
 ```
 Array
 (
     [0] => Array
         (
-            [skills] => OwFj0xfzITOMMMHMie4O0k6PxZ
-            [equipment] => PkpxFP9FzSqAA5AAJBAZBApBAJ
+            [skills] => OwFkMyd534lkDjzzBjoHuDNZcm+D
+            [equipment] => PkpxFP9FySqIlpI90MlpIDLfYpI7oMFZpcpMFpoA
             [weaponsets] => Array
                 (
-                    [0] =>
-                    [1] =>
-                    [2] =>
+                    [0] => PkZATPZjlsI
+                    [1] => PcZg8z6QJpC
+                    [2] => PgpgnnN4SJNSauVlC
                 )
+            [templatename] => 1 - WotA
+            [description] =>
             [player] => Player
-            [description] => 1 - WotA
+            [attributes] => Array
+                (
+                    [0] => 4
+                    [1] => 0
+                    [2] => 1
+                    [3] => 1
+                    [4] => 0
+                )
+            [flags] => Array
+                (
+                    [0]  => false
+                    [1]  => false
+                    [2]  => false
+                    [3]  => false
+                    [4]  => false
+                    [5]  => false
+                    [6]  => false
+                    [7]  => false
+                    [8]  => false
+                    [9]  => false
+                    [10] => false
+                    [11] => false
+                    [12] => false
+                    [13] => true
+                    [14] => true
+                    [15] => true
+                )
         )
 
-    ...more builds...
+        ...more builds...
 )
 ```
+
+### Encode paw·ned² Templates
+
+**PHP**
+```php
+// We're using Windows-1252 encoding here (default: UTF-8)
+$pwndTemplate = new PwndTemplate(PwndTemplate::PAWNED_CHARSET_WINDOWS1252);
+
+$pwndTemplate->addBuild(
+	skills:       'OwFj0xfzITOMMMHMie4O0kxZ6PA',
+	equipment:    'PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF',
+	weaponsets:   ['PcZQ8zoRpkC'],
+	templatename: '<template/build name>',
+	description:  '<description>',
+	player:       '<assigned player/hero>',
+	attributes:   [4, 0, 1, 1, 0],
+	flags:        [],
+);
+
+// add more builds (up to 12)
+
+$pwnd = $pwndTemplate->encode(); // -> pwnd template code
+```
+
+**JS**
+```js
+let pwndTemplate = new PwndTemplate(PwndTemplate.PAWNED_CHARSET_WINDOWS1252);
+
+pwndTemplate.addBuild(
+	'OwFj0xfzITOMMMHMie4O0kxZ6PA',
+	'PkpxFP9FzSqIlpI90MlpIDLfopInVBgpILlLlpIFF',
+	['PcZQ8zoRpkC'],
+	'<template/build name>',
+	'<description>',
+	'<assigned player/hero>',
+	[4, 0, 1, 1, 0],
+	[],
+);
+
+let pwnd = pwndTemplate.encode(); // -> pwnd template code
+```
+
+
 
 # Disclaimer
 
