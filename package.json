@@ -1,6 +1,6 @@
 {
 	"name": "@buildwars/gw-templates",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "A Guild Wars build template encoder/decoder.",
 	"license": "MIT",
 	"homepage": "https://github.com/build-wars/gw-templates",
