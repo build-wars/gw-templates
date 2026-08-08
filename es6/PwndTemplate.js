@@ -6,7 +6,7 @@
  */
 import TemplateAbstract from './TemplateAbstract.js';
 import PHPJS from './PHPJS.js';
-import * as windows1252 from 'windows-1252';
+import * as windows1252 from '../node_modules/windows-1252/windows-1252.mjs';
 
 /**
  * Biblically accurate paw·ned² team build encoder/decoder
