@@ -17,7 +17,6 @@ use function bindec;
 use function decbin;
 use function implode;
 use function pack;
-use function pow;
 use function preg_match;
 use function sodium_base642bin;
 use function sodium_bin2base64;
@@ -101,7 +100,7 @@ abstract class TemplateAbstract{
 	protected function getPadSize(array $nums, int $min_pad):int{
 
 		foreach($nums as $num){
-			if($num >= pow(2, $min_pad)){
+			if($num >= (2 ** $min_pad)){
 				$min_pad++;
 			}
 		}
@@ -110,6 +109,8 @@ abstract class TemplateAbstract{
 	}
 
 	/**
+	 * Decodes a string from unpadded base64
+	 *
 	 * @throws \SodiumException
 	 */
 	protected function base64decode(string $base64):string{
@@ -124,6 +125,8 @@ abstract class TemplateAbstract{
 	}
 
 	/**
+	 * Encodes a string into unpadded base64
+	 *
 	 * @throws \SodiumException
 	 */
 	protected function base64encode(string $string):string{

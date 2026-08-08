@@ -58,10 +58,16 @@ final class PwndTemplate extends TemplateAbstract{
 	public const PAWNED_CHARSET_WINDOWS1252 = 1;
 	public const PAWNED_CHARSET_UTF8        = 2;
 
+	public const ENCODING_UNDEFINED   = 'undefined';
+	public const ENCODING_ASCII       = 'ASCII';
+	public const ENCODING_WINDOWS1252 = 'Windows-1252';
+	public const ENCODING_UTF8        = 'UTF-8';
+
+
 	public const CHARSETS = [
-		self::PAWNED_CHARSET_UNDEFINED   => 'undefined',
-		self::PAWNED_CHARSET_WINDOWS1252 => 'Windows-1252',
-		self::PAWNED_CHARSET_UTF8        => 'UTF-8',
+		self::PAWNED_CHARSET_UNDEFINED   => self::ENCODING_UNDEFINED,
+		self::PAWNED_CHARSET_WINDOWS1252 => self::ENCODING_WINDOWS1252,
+		self::PAWNED_CHARSET_UTF8        => self::ENCODING_UTF8,
 	];
 
 	public const CON_LUNAR_FORTUNE       = 0;
@@ -122,8 +128,8 @@ final class PwndTemplate extends TemplateAbstract{
 #		self::MOD_OF_THE_DERVISH      => 'buOffTheDervish',
 	];
 
-	private const PWND_HEADER_PREFIX = 'pwnd';
 	private const BASE64             = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+	private const PWND_HEADER_PREFIX = 'pwnd';
 
 	/**
 	 * @var array{skills: string, equipment: string, weaponsets: string[], flags: string, player: string, description: string}[]
@@ -142,6 +148,21 @@ final class PwndTemplate extends TemplateAbstract{
 	public function __construct(int $encodingFlag = self::PAWNED_CHARSET_UTF8){
 		$this->encoding     = self::getEncoding($encodingFlag);
 		$this->encodingFlag = $encodingFlag;
+	}
+
+	/**
+	 * Returns the character encoding given in the header flag
+	 *
+	 * @see \mb_list_encodings()
+	 * @throws \InvalidArgumentException
+	 */
+	public static function getEncoding(int $encodingFlag):string{
+
+		if(!array_key_exists($encodingFlag, self::CHARSETS)){
+			throw new InvalidArgumentException('invalid encoding flag'); // @codeCoverageIgnore
+		}
+
+		return self::CHARSETS[$encodingFlag];
 	}
 
 	/**
@@ -169,21 +190,6 @@ final class PwndTemplate extends TemplateAbstract{
 		}
 
 		return $headerFlags;
-	}
-
-	/**
-	 * Returns the character encoding given in the header flag
-	 *
-	 * @see \mb_list_encodings()
-	 * @throws \InvalidArgumentException
-	 */
-	public static function getEncoding(int $encodingFlag):string{
-
-		if(!array_key_exists($encodingFlag, self::CHARSETS)){
-			throw new InvalidArgumentException('invalid encoding flag'); // @codeCoverageIgnore
-		}
-
-		return self::CHARSETS[$encodingFlag];
 	}
 
 	/**
@@ -416,7 +422,8 @@ final class PwndTemplate extends TemplateAbstract{
 
 		$desc = $this->decodeField($desc, $from_encoding);
 
-		// for some reason there was no LF character, we'll assume that whatever the string is as template name
+		// for some reason there was no LF character (trimmed from the end while decoding),
+		// we'll assume that whatever the string is as template name
 		if(!str_contains($desc, "\n")){
 			return [$desc, ''];
 		}
@@ -435,9 +442,7 @@ final class PwndTemplate extends TemplateAbstract{
 			return 'Cg'; // "\n" in base64
 		}
 
-		$templatename = $this->encodeField($templatename, $to_encoding);
-		$description  = $this->encodeField($description, $to_encoding);
-		$field        = $templatename."\n".$description;
+		$field = $this->encodeField($templatename."\n".$description, $to_encoding);
 
 		// for some reason the field can be longer than 255, up to 2-3 bytes [citation needed]
 		if(strlen($field) > 258){
@@ -450,7 +455,7 @@ final class PwndTemplate extends TemplateAbstract{
 	/**
 	 * Decodes Attribute bonuses and flags
 	 *
-	 * @return array{0: int[], 2: bool[]}
+	 * @return array{0: int[], 1: bool[]}
 	 * @phan-suppress PhanTypeMismatchReturn
 	 */
 	private function decodeFlags(string $flagsB64):array{
@@ -541,18 +546,25 @@ final class PwndTemplate extends TemplateAbstract{
 	 * @throws \RuntimeException
 	 */
 	private function decodeField(string $data, string $from_encoding):string{
-		$internal_encoding = mb_internal_encoding();
 
-		if($data === '' || $from_encoding === $internal_encoding){
-			return trim($data);
+		if($data === ''){
+			return '';
 		}
 
-		if($from_encoding === 'undefined'){
-			$from_encoding = mb_detect_encoding($data, ['Windows-1252', 'UTF-8', 'ASCII'], true);
+		if($from_encoding === self::ENCODING_UNDEFINED){
+			$encodings     = [self::ENCODING_WINDOWS1252, self::ENCODING_UTF8, self::ENCODING_ASCII];
+			$from_encoding = mb_detect_encoding($data, $encodings, true);
 
 			if($from_encoding === false){
 				throw new RuntimeException('cannot detect encoding of the given string'); // @codeCoverageIgnore
 			}
+		}
+
+		$internal_encoding = mb_internal_encoding();
+
+		// avoid double decoding
+		if($from_encoding === $internal_encoding){
+			return trim($data);
 		}
 
 		$data = mb_convert_encoding($data, $internal_encoding, $from_encoding);
@@ -570,14 +582,20 @@ final class PwndTemplate extends TemplateAbstract{
 	 * @throws \RuntimeException
 	 */
 	private function encodeField(string $data, string $to_encoding):string{
-		$internal_encoding = mb_internal_encoding();
 
-		if($data === '' || $to_encoding === $internal_encoding){
-			return $data;
+		if($data === ''){
+			return '';
 		}
 
-		if($to_encoding === 'undefined'){
-			$to_encoding = 'ASCII'; // not sure on that one, we'll run with it for now
+		if($to_encoding === self::ENCODING_UNDEFINED){
+			$to_encoding = self::ENCODING_ASCII; // not sure on that one, we'll run with it for now
+		}
+
+		$internal_encoding = mb_internal_encoding();
+
+		// avoid double encoding
+		if($to_encoding === $internal_encoding){
+			return $data;
 		}
 
 		$data = mb_convert_encoding($data, $to_encoding, $internal_encoding);
