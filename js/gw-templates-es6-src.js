@@ -1161,7 +1161,6 @@ class PwndTemplate extends TemplateAbstract{
 
 			for(let flag of Object.keys(PwndTemplate.FLAGS)){
 				base2 += $flags[flag] ? 1 : 0;
-
 			}
 
 			let bin = this._encodeBase2ToBinary(base2);
