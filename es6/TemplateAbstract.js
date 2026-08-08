@@ -22,13 +22,13 @@ export default class TemplateAbstract{
 	 * @type {number}
 	 * @protected
 	 */
-	offset = 0;
+	_offset = 0;
 
 	/**
 	 * @type {string}
 	 * @protected
 	 */
-	string = '';
+	_string = '';
 
 	/**
 	 * Reverses the given binary number string and converts it to an integer
@@ -37,7 +37,7 @@ export default class TemplateAbstract{
 	 * @returns {number|int}
 	 * @protected
 	 */
-	bindec_flip($bin){
+	_bindec_flip($bin){
 		return PHPJS.intval($bin.split('').reverse().join(''), 2);
 	}
 
@@ -48,7 +48,7 @@ export default class TemplateAbstract{
 	 * @returns {string}
 	 * @protected
 	 */
-	decbin_flip($dec){
+	_decbin_flip($dec){
 		return ($dec >>> 0).toString(2).split('').reverse().join('');
 	}
 
@@ -61,8 +61,8 @@ export default class TemplateAbstract{
 	 * @returns {string}
 	 * @protected
 	 */
-	decbin_pad($dec, $padding){
-		return this.decbin_flip($dec).padEnd($padding, '0');
+	_decbin_pad($dec, $padding){
+		return this._decbin_flip($dec).padEnd($padding, '0');
 	}
 
 	/**
@@ -73,7 +73,7 @@ export default class TemplateAbstract{
 	 * @throws {Error}
 	 * @protected
 	 */
-	checkCharacterSet($base64){
+	_checkCharacterSet($base64){
 		// nasty fix for urlencode and padded strings
 		$base64 = $base64.trim().replaceAll(' ', '+').replaceAll('=', '');
 
@@ -97,7 +97,7 @@ export default class TemplateAbstract{
 	 * @returns {number|int}
 	 * @protected
 	 */
-	getPadSize($nums, $min_pad){
+	_getPadSize($nums, $min_pad){
 
 		for(let num of $nums){
 			if(PHPJS.intval(num) >= (2 ** $min_pad)){
@@ -115,8 +115,8 @@ export default class TemplateAbstract{
 	 * @returns {string}
 	 * @protected
 	 */
-	base64decode($base64){
-		$base64 = this.checkCharacterSet($base64);
+	_base64decode($base64){
+		$base64 = this._checkCharacterSet($base64);
 
 		// we're gonna add zeroes until the bit count is divisible by 8
 		while(($base64.length % 8) !== 0){
@@ -133,7 +133,7 @@ export default class TemplateAbstract{
 	 * @returns {string}
 	 * @protected
 	 */
-	base64encode($string){
+	_base64encode($string){
 
 		let b64 = ($string instanceof Uint8Array)
 			? $string.toBase64()
@@ -149,8 +149,8 @@ export default class TemplateAbstract{
 	 * @returns {number|int}
 	 * @protected
 	 */
-	read($length){
-		return this.bindec_flip(this.string.substring(this.offset, (this.offset += $length)));
+	_read($length){
+		return this._bindec_flip(this._string.substring(this._offset, (this._offset += $length)));
 	}
 
 	/**
@@ -160,17 +160,17 @@ export default class TemplateAbstract{
 	 * @returns {string}
 	 * @protected
 	 */
-	decodeTemplate($base64){
+	_decodeTemplate($base64){
 
 		if($base64 === ''){
 			throw new Error('invalid base64 template');
 		}
 
 		// decode the template into 8-bit characters (unsigned char)
-		let chars = this.base64decode($base64);
-		let base2 = this.decodeBinaryToBase2(chars);
+		let chars = this._base64decode($base64);
+		let base2 = this._decodeBinaryToBase2(chars);
 		// get the first 4 bits and decide what to do
-		switch(this.bindec_flip(base2.substring(0, 4))){
+		switch(this._bindec_flip(base2.substring(0, 4))){
 			// new format, remove leading template type and version number
 			case this.TEMPLATE_SKILL_NEW:
 			case this.TEMPLATE_EQUIPMENT_NEW:
@@ -192,15 +192,15 @@ export default class TemplateAbstract{
 	 * @throws {Error}
 	 * @protected
 	 */
-	encodeTemplate($base2){
+	_encodeTemplate($base2){
 
 		if($base2 === ''){
 			throw new Error('invalid binary template');
 		}
 
-		let $bin8 = this.encodeBase2ToBinary($base2);
+		let $bin8 = this._encodeBase2ToBinary($base2);
 		// convert to base64
-		return this.base64encode($bin8);
+		return this._base64encode($bin8);
 	}
 
 	/**
@@ -212,7 +212,7 @@ export default class TemplateAbstract{
 	 * @param {string} $chars
 	 * @protected
 	 */
-	decodeBinaryToBase2($chars){
+	_decodeBinaryToBase2($chars){
 		// unpack the string from unsigned char
 		let $uint8 = $chars.split('').map(c => c.charCodeAt(0));
 		// base convert 10 to 2 (8 bits each value, zero padded to the left)
@@ -229,7 +229,7 @@ export default class TemplateAbstract{
 	 * @param {string} $base2
 	 * @protected
 	 */
-	encodeBase2ToBinary($base2){
+	_encodeBase2ToBinary($base2){
 		// fill the string with zeroes until it is divisible by 6 and 8
 		while($base2.length % 8 !== 0 || $base2.length % 6 !== 0){
 			$base2 += '0';

@@ -185,12 +185,12 @@ export default class PwndTemplate extends TemplateAbstract{
 			throw new Error('invalid paw·ned² template');
 		}
 
-		this.string = this.checkCharacterSet($pwnd.substring(start + 1, end));
-		this.offset = 0;
+		this._string = this._checkCharacterSet($pwnd.substring(start + 1, end));
+		this._offset = 0;
 
 		let builds = [];
 
-		while(this.offset < this.string.length){
+		while(this._offset < this._string.length){
 			let skills     = this.#readString();
 			let equipment  = this.#readString();
 			let weaponsets = [];
@@ -227,7 +227,7 @@ export default class PwndTemplate extends TemplateAbstract{
 	 * @returns {string}
 	 */
 	encode(){
-		let pwnd  = '>';
+		let pwnd = '>';
 
 		for(let build of this.#builds){
 			pwnd += this.#writeString(build.skills);
@@ -274,8 +274,8 @@ export default class PwndTemplate extends TemplateAbstract{
 	){
 
 		this.#builds.push({
-			skills     : this.checkCharacterSet($skills),
-			equipment  : this.checkCharacterSet($equipment),
+			skills     : this._checkCharacterSet($skills),
+			equipment  : this._checkCharacterSet($equipment),
 			weaponsets : this.#normalizeWeaponsets($weaponsets),
 			flags      : this.#encodeFlags($attributes, $flags),
 			player     : this.#encodePlayername($player, this.#encoding),
@@ -304,7 +304,6 @@ export default class PwndTemplate extends TemplateAbstract{
 	 */
 	#normalizeWeaponsets($weaponsets){
 		let normalizedWeaponsets = ['', '', ''];
-
 		let i = 0;
 
 		for(let weaponset of $weaponsets){
@@ -327,7 +326,7 @@ export default class PwndTemplate extends TemplateAbstract{
 
 			// we're being generous and just skip invalid items
 			try{
-				weaponset = this.checkCharacterSet(weaponset);
+				weaponset = this._checkCharacterSet(weaponset);
 			}
 			catch(e){
 				continue;
@@ -349,7 +348,7 @@ export default class PwndTemplate extends TemplateAbstract{
 	 * @returns {string}
 	 */
 	#decodePlayerName($playerB64, $from_encoding){
-		let player = this.base64decode($playerB64);
+		let player = this._base64decode($playerB64);
 
 		return this.#decodeField(player, $from_encoding);
 	}
@@ -379,7 +378,7 @@ export default class PwndTemplate extends TemplateAbstract{
 			throw new Error('player name cannot be longer than 48 bytes in UTF-8 mode');
 		}
 
-		return this.base64encode(encodedName);
+		return this._base64encode(encodedName);
 	}
 
 	/**
@@ -390,7 +389,7 @@ export default class PwndTemplate extends TemplateAbstract{
 	 * @returns {[string, string]}
 	 */
 	#decodeDescription($descB64, $from_encoding){
-		let desc = this.base64decode($descB64);
+		let desc = this._base64decode($descB64);
 
 		// the LF should always be present, even if both fields are empty
 		if(desc.length <= 1){
@@ -430,7 +429,7 @@ export default class PwndTemplate extends TemplateAbstract{
 			throw new Error('template name and description combined cannot be longer than 255 bytes');
 		}
 
-		return this.base64encode(field);
+		return this._base64encode(field);
 	}
 
 	/**
@@ -464,7 +463,7 @@ export default class PwndTemplate extends TemplateAbstract{
 			}
 			// the bytes for the consumable flags are read as big-endian, aka we need to flip them
 			else{
-				flag_b2 += this.decbin_pad(ord, 6);
+				flag_b2 += this._decbin_pad(ord, 6);
 			}
 		}
 
@@ -512,8 +511,8 @@ export default class PwndTemplate extends TemplateAbstract{
 
 			}
 
-			let bin = this.encodeBase2ToBinary(base2);
-			b64 += this.base64encode(bin);
+			let bin = this._encodeBase2ToBinary(base2);
+			b64 += this._base64encode(bin);
 		}
 
 		// cut off unnecessary zero padding
@@ -609,14 +608,14 @@ export default class PwndTemplate extends TemplateAbstract{
 	 * @returns {string}
 	 */
 	#readString($isVariableField = false){
-		let length = this.read(1);
+		let length = this._read(1);
 
 		if($isVariableField){
 			length *= 64;
-			length += this.read(1);
+			length += this._read(1);
 		}
 
-		return this.string.substring(this.offset, (this.offset += length));
+		return this._string.substring(this._offset, (this._offset += length));
 	}
 
 	/**
@@ -654,8 +653,8 @@ export default class PwndTemplate extends TemplateAbstract{
 	 * @param {number|int} $length
 	 * @returns {number|int}
 	 */
-	read($length){
-		return this.#base64_ord(this.string.substring(this.offset, (this.offset += $length)));
+	_read($length){
+		return this.#base64_ord(this._string.substring(this._offset, (this._offset += $length)));
 	}
 
 }

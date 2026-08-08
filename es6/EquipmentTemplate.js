@@ -82,28 +82,28 @@ export default class EquipmentTemplate extends TemplateAbstract{
 	 * @returns {{id: number, slot: number, color: number, mods: number[]}[]}
 	 */
 	decode($template){
-		this.string = this.decodeTemplate($template);
-		this.offset = 0;
-		this.#items = {};
+		this._string = this._decodeTemplate($template);
+		this._offset = 0;
+		this.#items  = {};
 
 		// get item id length code, mod id length code and item count
-		let item_id_length = this.read(4);
-		let mod_id_length  = this.read(4);
-		let item_count     = this.read(3);
+		let item_id_length = this._read(4);
+		let mod_id_length  = this._read(4);
+		let item_count     = this._read(3);
 
 		// loop through the items
 		for(let i = 0; i < item_count; i++){
 			// get item type, id, number of mods and item color
-			let slot      = this.read(3);
-			let id        = this.read(item_id_length);
-			let mod_count = this.read(2);
-			let color     = this.read(4);
+			let slot      = this._read(3);
+			let id        = this._read(item_id_length);
+			let mod_count = this._read(2);
+			let color     = this._read(4);
 
 			// loop through the mods
 			let mods = [];
 
 			for(let j = 0; j < mod_count; j++){
-				mods.push(this.read(mod_id_length));
+				mods.push(this._read(mod_id_length));
 			}
 
 			this.#items[String(slot)] = {id: id, slot: slot, color: color, mods: mods};
@@ -120,9 +120,9 @@ export default class EquipmentTemplate extends TemplateAbstract{
 	encode(){
 		// start of the binary string:
 		// type (15,4)
-		let bin  = this.decbin_pad(this.TEMPLATE_EQUIPMENT_NEW, 4);
+		let bin  = this._decbin_pad(this.TEMPLATE_EQUIPMENT_NEW, 4);
 		// version (0,4)
-		bin += this.decbin_pad(0, 4);
+		bin += this._decbin_pad(0, 4);
 
 		let itemIDs = [];
 		let modIDs  = [];
@@ -132,26 +132,26 @@ export default class EquipmentTemplate extends TemplateAbstract{
 			modIDs = modIDs.concat(this.#items[slot].mods)
 		}
 
-		let item_length = this.getPadSize(itemIDs, 8);
-		let mod_length  = this.getPadSize(modIDs, 8);
+		let item_length = this._getPadSize(itemIDs, 8);
+		let mod_length  = this._getPadSize(modIDs, 8);
 
 		// add length codes and item count
-		bin += this.decbin_pad(item_length, 4);
-		bin += this.decbin_pad(mod_length, 4);
-		bin += this.decbin_pad(Object.keys(this.#items).length, 3);
+		bin += this._decbin_pad(item_length, 4);
+		bin += this._decbin_pad(mod_length, 4);
+		bin += this._decbin_pad(Object.keys(this.#items).length, 3);
 
 		for(let slot in this.#items){
-			bin += this.decbin_pad(this.#items[slot].slot, 3);
-			bin += this.decbin_pad(this.#items[slot].id, item_length);
-			bin += this.decbin_pad(this.#items[slot].mods.length, 2);
-			bin += this.decbin_pad(this.#items[slot].color, 4);
+			bin += this._decbin_pad(this.#items[slot].slot, 3);
+			bin += this._decbin_pad(this.#items[slot].id, item_length);
+			bin += this._decbin_pad(this.#items[slot].mods.length, 2);
+			bin += this._decbin_pad(this.#items[slot].color, 4);
 
 			for(let mod of this.#items[slot].mods){
-				bin += this.decbin_pad(mod, mod_length);
+				bin += this._decbin_pad(mod, mod_length);
 			}
 		}
 
-		return this.encodeTemplate(bin);
+		return this._encodeTemplate(bin);
 	}
 
 	/**

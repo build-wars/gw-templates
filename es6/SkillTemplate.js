@@ -39,30 +39,30 @@ export default class SkillTemplate extends TemplateAbstract{
 	 * @returns {{code: string, prof_pri: number|int, prof_sec: number|int, attributes: {}, skills: number[]}}
 	 */
 	decode($template){
-		this.string = this.decodeTemplate($template);
-		this.offset = 0;
+		this._string = this._decodeTemplate($template);
+		this._offset = 0;
 
 		// profession length code, seems to be unused and will always be 00
-		let pl    = this.read(2);
+		let pl    = this._read(2);
 		// primary profession id
-		let pri   = this.read(4);
+		let pri   = this._read(4);
 		// secondary profession id
-		let sec   = this.read(4);
+		let sec   = this._read(4);
 		// attribute count
-		let attrc = this.read(4);
+		let attrc = this._read(4);
 		// attribute id length code
-		let attrl = (this.read(4) + 4);
+		let attrl = (this._read(4) + 4);
 
 		let attributes = {};
 
 		// get the attributes
 		for(let i = 0; i < attrc; i++){
-			attributes[this.read(attrl)] = this.read(4);
+			attributes[this._read(attrl)] = this._read(4);
 		}
 
 		// get the skillbar
-		let skill_id_len = (this.read(4) + 8);
-		let skills       = [0, 0, 0, 0, 0, 0, 0, 0].map(() => this.read(skill_id_len));
+		let skill_id_len = (this._read(4) + 8);
+		let skills       = [0, 0, 0, 0, 0, 0, 0, 0].map(() => this._read(skill_id_len));
 
 		return {code: $template, prof_pri: pri, prof_sec: sec, attributes: attributes, skills: skills};
 	}
@@ -83,39 +83,39 @@ export default class SkillTemplate extends TemplateAbstract{
 
 		// start of the binary string:
 		// type (14,4)
-		let $bin = this.decbin_pad(this.TEMPLATE_SKILL_NEW, 4);
+		let $bin = this._decbin_pad(this.TEMPLATE_SKILL_NEW, 4);
 		// version (0,4)
-		$bin += this.decbin_pad(0, 4);
+		$bin += this._decbin_pad(0, 4);
 		// profession length code (0,2)
-		$bin += this.decbin_pad(0, 2);
+		$bin += this._decbin_pad(0, 2);
 		// add professions
-		$bin += this.decbin_pad($prof_pri, 4);
-		$bin += this.decbin_pad($prof_sec, 4);
+		$bin += this._decbin_pad($prof_pri, 4);
+		$bin += this._decbin_pad($prof_sec, 4);
 		// add attribute count
 		let attributeIDs = Object.keys($attributes);
-		$bin += this.decbin_pad(attributeIDs.length, 4);
+		$bin += this._decbin_pad(attributeIDs.length, 4);
 		// get attribute pad size
-		let $attr_pad = this.getPadSize(attributeIDs, 5);
+		let $attr_pad = this._getPadSize(attributeIDs, 5);
 
 		// add attribute length code
-		$bin += this.decbin_pad(($attr_pad - 4), 4);
+		$bin += this._decbin_pad(($attr_pad - 4), 4);
 
 		// add attribute ids and corresponding values
 		for(let id in $attributes){
-			$bin += this.decbin_pad(PHPJS.intval(id), $attr_pad);
-			$bin += this.decbin_pad($attributes[id], 4);
+			$bin += this._decbin_pad(PHPJS.intval(id), $attr_pad);
+			$bin += this._decbin_pad($attributes[id], 4);
 		}
 
 		// get skill pad size
-		let $skill_pad = this.getPadSize($skills, 10);
+		let $skill_pad = this._getPadSize($skills, 10);
 		// add skill length code
-		$bin += this.decbin_pad(($skill_pad - 8), 4);
+		$bin += this._decbin_pad(($skill_pad - 8), 4);
 		// add skill ids
 		for(let id of $skills){
-			$bin += this.decbin_pad(id, $skill_pad);
+			$bin += this._decbin_pad(id, $skill_pad);
 		}
 
-		return this.encodeTemplate($bin);
+		return this._encodeTemplate($bin);
 	}
 
 	/**
@@ -190,7 +190,6 @@ export default class SkillTemplate extends TemplateAbstract{
 	 */
 	normalizeSkills($skills){
 		let normalizedSkills = [0, 0, 0, 0, 0, 0, 0, 0];
-
 		let i = 0;
 
 		for(let skill of $skills){
