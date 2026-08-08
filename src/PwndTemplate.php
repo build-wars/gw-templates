@@ -151,6 +151,13 @@ final class PwndTemplate extends TemplateAbstract{
 	}
 
 	/**
+	 * @codeCoverageIgnore
+	 */
+	public static function fromChatCode(string $chatCode):array{
+		throw new RuntimeException('not supported');
+	}
+
+	/**
 	 * Returns the character encoding given in the header flag
 	 *
 	 * @see \mb_list_encodings()
@@ -198,13 +205,13 @@ final class PwndTemplate extends TemplateAbstract{
 	 * @return array{skills: string, equipment:string, weaponsets: string[], templatename: string, description: string, player: string, attributes: int[], flags: bool[]}[]
 	 * @throws \InvalidArgumentException
 	 */
-	public function decode(string $pwnd):array{
+	public function decode(string $template):array{
 		// detect encoding (we're doing this first as the header parser will throw on invalid template)
-		$headerFlags = self::parseHeader($pwnd);
+		$headerFlags = self::parseHeader($template);
 		$encoding    = self::getEncoding($headerFlags[3]);
 
 		// find the template string
-		$pwnd  = str_replace(["\r", "\n", "\t"], '', trim($pwnd));
+		$pwnd  = str_replace(["\r", "\n", "\t"], '', trim($template));
 		$start = strrpos($pwnd, '>'); // maybe not the best idea... (better than reading from the start tho)
 		$end   = strpos($pwnd, '<', $start);
 

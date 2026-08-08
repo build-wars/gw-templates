@@ -15,6 +15,7 @@ use BuildWars\GWTemplates\SkillTemplate;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use function sprintf;
 
 /**
  * Tests the `SkillTemplate` class
@@ -45,6 +46,20 @@ class SkillTemplateTest extends TestCase{
 				[0, 0, 0, 0, 0, 0, 0, 1],
 			],
 		];
+	}
+
+	/**
+	 * @param array<int, int> $attributes
+	 * @param int[]           $skills
+	 */
+	#[Test]
+	#[DataProvider('skillTemplateProvider')]
+	public function fromChatCode(string $template, int $pri, int $sec, array $attributes, array $skills):void{
+		$build = SkillTemplate::fromChatCode(sprintf('[Test chat code;%s]', $template));
+		$this::assertSame($pri, $build['prof_pri']);
+		$this::assertSame($sec, $build['prof_sec']);
+		$this::assertSame($attributes, $build['attributes']);
+		$this::assertSame($skills, $build['skills']);
 	}
 
 	/**

@@ -31,6 +31,34 @@ export default class TemplateAbstract{
 	_string = '';
 
 	/**
+	 * @param {string} $template
+	 * @returns{*}
+	 * @abstract
+	 */
+	decode($template){
+		throw new Error('abstract nethod');
+	}
+
+	/**
+	 * @param {string} $template
+	 * @abstract
+	 */
+	static fromTemplate($template){
+		// stackoverflow, how do i get the constructor name of a child class from a static method in the parent?
+		// PHP: (new static)->decode()
+		throw new Error('not dealing with this shit here');
+	}
+
+	/**
+	 * @param {string} $chatCode
+	 * @abstract
+	 */
+	static fromChatCode($chatCode){
+		// PHP: static::fromTemplate()
+		throw new Error('not dealing with this shit here');
+	}
+
+	/**
 	 * Reverses the given binary number string and converts it to an integer
 	 *
 	 * @param {string} $bin

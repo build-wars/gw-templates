@@ -62,6 +62,12 @@ suite('EquipmentTemplateTest', function(){
 
 	equipmentTemplateProvider.forEach(([$template, $expected]) => {
 
+		test('fromChatCode', function(){
+			let equipment = EquipmentTemplate.fromChatCode(`[Test chat code;${$template}]`);
+
+			assert.deepEqual(equipment, $expected);
+		});
+
 		test('decodeEquipment', function(){
 			let equipment = _equipmentTemplate.decode($template);
 

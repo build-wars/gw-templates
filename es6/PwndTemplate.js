@@ -120,6 +120,14 @@ export default class PwndTemplate extends TemplateAbstract{
 		this.#encodingFlag = $encodingFlag;
 	}
 
+	static fromTemplate($template){
+		return new PwndTemplate().decode($template);
+	}
+
+	static fromChatCode($chatCode){
+		throw new Error('not supported');
+	}
+
 	/**
 	 * Returns the character encoding given in the header flag
 	 *

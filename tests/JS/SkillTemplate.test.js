@@ -48,6 +48,15 @@ suite('SkillTemplateTest', function(){
 
 	skillTemplateProvider.forEach(([$template, $pri, $sec, $attributes, $skills]) => {
 
+		test('fromChatCode', function(){
+			let build = SkillTemplate.fromChatCode(`[Test chat code;${$template}]`);
+
+			assert.strictEqual(build.prof_pri, $pri);
+			assert.strictEqual(build.prof_sec, $sec);
+			assert.deepEqual(build.attributes, $attributes);
+			assert.deepEqual(build.skills, $skills);
+		});
+
 		test('decodeSkills', function(){
 			let build = _skillTemplate.decode($template);
 

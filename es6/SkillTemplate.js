@@ -32,6 +32,21 @@ export default class SkillTemplate extends TemplateAbstract{
 		'43': 10, '44': 10,
 	};
 
+	static fromTemplate($template){
+		return new SkillTemplate().decode($template);
+	}
+
+	static fromChatCode($chatCode){
+		// noinspection RegExpRedundantEscape
+		let match = $chatCode.trim().match(/^\[(?<name>[^;]*);(?<code>[A-Za-z0-9\+\/ ]+)\]$/);
+
+		if(match === null || !match.groups){
+			throw new Error('invalid chat code');
+		}
+
+		return SkillTemplate.fromTemplate(match.groups.code);
+	}
+
 	/**
 	 * Decodes the given skill template into an array
 	 *
@@ -43,6 +58,7 @@ export default class SkillTemplate extends TemplateAbstract{
 		this._offset = 0;
 
 		// profession length code, seems to be unused and will always be 00
+		// noinspection JSUnusedLocalSymbols
 		let pl    = this._read(2);
 		// primary profession id
 		let pri   = this._read(4);

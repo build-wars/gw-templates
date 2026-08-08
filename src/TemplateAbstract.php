@@ -51,6 +51,32 @@ abstract class TemplateAbstract{
 #		}
 #	}
 
+	abstract public function decode(string $template):array;
+
+	/**
+	 * Decodes a template from the given base64 template code (convenience)
+	 */
+	public static function fromTemplate(string $template):array{
+		/** @phan-suppress-next-line PhanTypeInstantiateAbstractStatic */
+		return (new static)->decode($template);
+	}
+
+	/**
+	 * Deccodes a template from a valid chat code
+	 *
+	 *   [<template name>;<base64 template code>]
+	 */
+	public static function fromChatCode(string $chatCode):array{
+		/** @noinspection RegExpRedundantEscape */
+		preg_match('/^\[(?<name>[^;]*);(?<code>[A-Za-z0-9\+\/ ]+)\]$/', trim($chatCode), $match);
+
+		if($match === []){
+			throw new InvalidArgumentException('invalid chat code');
+		}
+
+		return static::fromTemplate($match['code']);
+	}
+
 	/**
 	 * Reverses the given binary number string and converts it to an integer
 	 */

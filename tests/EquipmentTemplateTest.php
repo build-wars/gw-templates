@@ -15,6 +15,7 @@ use BuildWars\GWTemplates\EquipmentTemplate;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
+use function sprintf;
 
 /**
  * Tests the `EquipmentTemplate` class
@@ -63,6 +64,17 @@ class EquipmentTemplateTest extends TestCase{
 			],
 
 		];
+	}
+
+	/**
+	 * @param array{id: int, slot: int, color: int, mods: int[]}[] $expected
+	 */
+	#[Test]
+	#[DataProvider('equipmentTemplateProvider')]
+	public function fromChatCode(string $template, array $expected):void{
+		$equipment = EquipmentTemplate::fromChatCode(sprintf('[Test chat code;%s]', $template));
+
+		$this::assertSame($expected, $equipment);
 	}
 
 	/**

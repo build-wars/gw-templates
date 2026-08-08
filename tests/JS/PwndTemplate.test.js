@@ -439,7 +439,7 @@ suite('SkillTemplateTest', function(){
 			assert.strictEqual(code.replaceAll('\r', ''), $pwnd);
 
 			// decode the freshly encoded template and check again
-			team = pwndTemplate.decode(code);
+			team = PwndTemplate.fromTemplate(code);
 
 			assert.deepEqual(Object.values(array_column(team, 'description')), $expectedDescriptions);
 			assert.deepEqual(Object.values(array_column(team, 'player')), $expectedPlayers);

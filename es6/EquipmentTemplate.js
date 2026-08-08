@@ -75,6 +75,21 @@ export default class EquipmentTemplate extends TemplateAbstract{
 	 */
 	#items = {};
 
+	static fromTemplate($template){
+		return new EquipmentTemplate().decode($template);
+	}
+
+	static fromChatCode($chatCode){
+		// noinspection RegExpRedundantEscape
+		let match = $chatCode.trim().match(/^\[(?<name>[^;]*);(?<code>[A-Za-z0-9\+\/ ]+)\]$/);
+
+		if(match === null || !match.groups){
+			throw new Error('invalid chat code');
+		}
+
+		return EquipmentTemplate.fromTemplate(match.groups.code);
+	}
+
 	/**
 	 * Decodes the given equipment template into an array
 	 *
