@@ -18,7 +18,16 @@ export default class TemplateAbstract{
 	get TEMPLATE_EQUIPMENT_OLD(){return 0b0001}
 	get TEMPLATE_EQUIPMENT_NEW(){return 0b1111}
 
+	/**
+	 * @type {number}
+	 * @protected
+	 */
 	offset = 0;
+
+	/**
+	 * @type {string}
+	 * @protected
+	 */
 	string = '';
 
 	/**
@@ -61,6 +70,7 @@ export default class TemplateAbstract{
 	 *
 	 * @param {string} $base64
 	 * @returns {string}
+	 * @throws {Error}
 	 * @protected
 	 */
 	checkCharacterSet($base64){
@@ -85,11 +95,12 @@ export default class TemplateAbstract{
 	 * @param {number[]} $nums
 	 * @param {number|int} $min_pad
 	 * @returns {number|int}
+	 * @protected
 	 */
 	getPadSize($nums, $min_pad){
 
 		for(let num of $nums){
-			if(PHPJS.intval(num) >= Math.pow(2, $min_pad)){
+			if(PHPJS.intval(num) >= (2 ** $min_pad)){
 				$min_pad++;
 			}
 		}
@@ -98,8 +109,11 @@ export default class TemplateAbstract{
 	}
 
 	/**
+	 * Decodes a string from unpadded base64
+	 *
 	 * @param {string} $base64
 	 * @returns {string}
+	 * @protected
 	 */
 	base64decode($base64){
 		$base64 = this.checkCharacterSet($base64);
@@ -113,22 +127,30 @@ export default class TemplateAbstract{
 	}
 
 	/**
-	 * @param {string} $string
+	 * Encodes a string into unpadded base64
+	 *
+	 * @param {Uint8Array|string} $string
 	 * @returns {string}
+	 * @protected
 	 */
 	base64encode($string){
-		return btoa($string).replaceAll('=', '');
+
+		let b64 = ($string instanceof Uint8Array)
+			? $string.toBase64()
+			: btoa($string);
+
+		return b64.replaceAll('=', '');
 	}
 
 	/**
+	 * Reads the given amount of bits from the set string
+	 *
 	 * @param {number|int} $length
 	 * @returns {number|int}
+	 * @protected
 	 */
 	read($length){
-		let $dec = this.bindec_flip(this.string.substring(this.offset, (this.offset + $length)));
-		this.offset += $length;
-
-		return $dec;
+		return this.bindec_flip(this.string.substring(this.offset, (this.offset += $length)));
 	}
 
 	/**
@@ -167,6 +189,7 @@ export default class TemplateAbstract{
 	 *
 	 * @param {string} $base2
 	 * @returns {string}
+	 * @throws {Error}
 	 * @protected
 	 */
 	encodeTemplate($base2){
@@ -185,6 +208,9 @@ export default class TemplateAbstract{
 	 * into a base2 string suitable for reading the template data.
 	 *
 	 * @see https://wiki.guildwars.com/wiki/Talk:Skill_template_format#I_don't_get_it
+	 *
+	 * @param {string} $chars
+	 * @protected
 	 */
 	decodeBinaryToBase2($chars){
 		// unpack the string from unsigned char
@@ -199,6 +225,9 @@ export default class TemplateAbstract{
 
 	/**
 	 * Encodes the given base2 template data string into an 8-bit binary string.
+	 *
+	 * @param {string} $base2
+	 * @protected
 	 */
 	encodeBase2ToBinary($base2){
 		// fill the string with zeroes until it is divisible by 6 and 8

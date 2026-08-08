@@ -8,6 +8,62 @@
 export default class PHPJS{
 
 	/**
+	 * not an exact implementation, we're ignoring the $start_index parameter, which is always 0 here
+	 *
+	 * @param {number|int} $count
+	 * @param {*} $value
+	 * @returns {Array}
+	 */
+	static array_fill($count, $value){
+		let arr = [];
+
+		for(let key = 0; key < $count; key++){
+			arr[key] = structuredClone($value);
+		}
+
+		return arr;
+	}
+
+
+	/**
+	 * @link https://locutus.io/php/array_sum/
+	 *
+	 * @param {{}|[]} array
+	 * @returns {number}
+	 */
+	static array_sum(array){
+		let sum = 0;
+
+		if(array === null){
+			return 0;
+		}
+
+		if(typeof array !== 'object'){
+			array = {};
+		}
+
+		for(let value of Object.values(array)){
+			let parsed = value;
+
+			if(typeof value === 'boolean'){
+				parsed = value ? 1 : 0;
+			}
+			else if(value === null || value === undefined){
+				parsed = 0;
+			}
+			else if(typeof value !== 'number'){
+				parsed = parseFloat(String(value));
+			}
+
+			if(!isNaN(parsed)){
+				sum += parsed;
+			}
+		}
+
+		return sum;
+	}
+
+	/**
 	 * @link  https://locutus.io/php/var/intval/
 	 *
 	 * @param {*} $var

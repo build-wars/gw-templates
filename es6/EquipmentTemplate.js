@@ -71,22 +71,15 @@ export default class EquipmentTemplate extends TemplateAbstract{
 	};
 
 	/**
-	 * @var array{id: int, slot: int, color: int, mods: int[]}[]
+	 * @type {{id: int, slot: int, color: int, mods: int[]}[]}
 	 */
 	#items = {};
 
 	/**
 	 * Decodes the given equipment template into an array
 	 *
-	 *    array{
-	 *      id:    int,
-	 *      slot:  int,
-	 *      color: int,
-	 *      mods:  int[]
-	 *    }
-	 *
 	 * @param {string} $template
-	 * @returns {*}
+	 * @returns {{id: number, slot: number, color: number, mods: number[]}[]}
 	 */
 	decode($template){
 		this.string = this.decodeTemplate($template);
@@ -113,7 +106,7 @@ export default class EquipmentTemplate extends TemplateAbstract{
 				mods.push(this.read(mod_id_length));
 			}
 
-			this.#items[slot] = {id: id, slot: slot, color: color, mods: mods};
+			this.#items[String(slot)] = {id: id, slot: slot, color: color, mods: mods};
 		}
 
 		return this.#items;
@@ -168,25 +161,25 @@ export default class EquipmentTemplate extends TemplateAbstract{
 	 * @param {number|int} $color
 	 * @param {int[]} $mods
 	 * @returns {EquipmentTemplate}
+	 * @throws {Error}
 	 */
 	addItem($id, $color = 0, $mods = []){
-		let idStr = $id.toString(); // js object key weirdness
 
-		if(this.#ITEM_TO_SLOT[idStr] === undefined){
+		if(this.#ITEM_TO_SLOT[String($id)] === undefined){
 			throw new Error('invalid item id');
 		}
 
-		if(this.#ITEM_COLORS[$color.toString()] === undefined){
+		if(this.#ITEM_COLORS[String($color)] === undefined){
 			throw new Error('invalid color id');
 		}
 
-		let slot = this.#ITEM_TO_SLOT[idStr];
+		let slot = this.#ITEM_TO_SLOT[String($id)];
 
-		this.#items[slot] = {
+		this.#items[String(slot)] = {
 			id   : $id,
 			slot : slot,
 			color: $color,
-			mods : this.normalizeMods($mods),
+			mods : this.#normalizeMods($mods),
 		}
 
 		return this;
@@ -208,9 +201,8 @@ export default class EquipmentTemplate extends TemplateAbstract{
 	 *
 	 * @param {int[]} $mods
 	 * @returns {int[]}
-	 * @private
 	 */
-	normalizeMods($mods){
+	#normalizeMods($mods){
 		let normalizedMods = [];
 
 		for(let modID of $mods){

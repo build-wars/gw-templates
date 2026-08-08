@@ -35,16 +35,8 @@ export default class SkillTemplate extends TemplateAbstract{
 	/**
 	 * Decodes the given skill template into an array
 	 *
-	 *   array{
-	 *     code:       string,
-	 *     prof_pri:   int,
-	 *     prof_sec:   int,
-	 *     attributes: array<int, int>,
-	 *     skills:     int[]
-	 *   }
-	 *
 	 * @param {string} $template
-	 * @returns {*}
+	 * @returns {{code: string, prof_pri: number|int, prof_sec: number|int, attributes: {}, skills: number[]}}
 	 */
 	decode($template){
 		this.string = this.decodeTemplate($template);
@@ -136,11 +128,11 @@ export default class SkillTemplate extends TemplateAbstract{
 	 */
 	normalizeProfessions($pri, $sec){
 
-		if(this.#PROF_TO_PRI[$pri.toString()] === undefined){
+		if(this.#PROF_TO_PRI[String($pri)] === undefined){
 			$pri = 0;
 		}
 
-		if(this.#PROF_TO_PRI[$sec.toString()] === undefined || $sec === $pri){
+		if(this.#PROF_TO_PRI[String($sec)] === undefined || $sec === $pri){
 			$sec = 0;
 		}
 
@@ -155,6 +147,7 @@ export default class SkillTemplate extends TemplateAbstract{
 	 * @param {*} $attributes
 	 * @param {number|int} $pri
 	 * @param {number|int} $sec
+	 * @returns {}
 	 * @private
 	 */
 	normalizeAttributes($attributes, $pri, $sec){
@@ -175,9 +168,7 @@ export default class SkillTemplate extends TemplateAbstract{
 			}
 
 			// primary attribute of secondary profession
-			let sec = $sec.toString(); // object key weirdness
-
-			if(this.#PROF_TO_PRI[sec] !== undefined && profession === this.#PROF_TO_PRI[sec]){
+			if(this.#PROF_TO_PRI[String($sec)] !== undefined && profession === this.#PROF_TO_PRI[String($sec)]){
 				continue;
 			}
 
