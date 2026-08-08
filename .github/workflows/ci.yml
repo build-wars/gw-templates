@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: "Install PHP"
         uses: shivammathur/setup-php@v2
@@ -68,7 +68,7 @@ jobs:
 
 
   tests:
-    name: "Unit Tests"
+    name: "Unit Tests (PHP)"
     needs: static-code-analysis
     runs-on: ${{ matrix.os }}
 
@@ -87,7 +87,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: "Install PHP with extensions"
         uses: shivammathur/setup-php@v2
@@ -96,6 +96,9 @@ jobs:
           extensions: ${{ env.PHP_EXTENSIONS }}
           ini-values: ${{ env.PHP_INI_VALUES }}
           coverage: pcov
+        # https://github.com/shivammathur/setup-php/issues/1096#issuecomment-5026413877
+        env:
+          fail-fast: true
 
       - name: "Install dependencies with composer"
         uses: ramsey/composer-install@v4
@@ -111,14 +114,12 @@ jobs:
 
 
   build-js:
-    name: "Build (Javascript)"
+    name: "Unit Tests (Javascript)"
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: "checkout sources"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: "install dependencies"
         run: npm install
@@ -136,23 +137,61 @@ jobs:
         run: npm run build-src
 
       - name: "send code coverage report to codecov.io"
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: .build/coverage-js/clover.xml
 
+
+  build-public:
+    needs: build-js
+    name: "Publish files"
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: "Checkout sources"
+        uses: actions/checkout@v7
+
+      - name: "install dependencies"
+        run: npm install
+
+      - name: "build"
+        run: npm run build
+
+      - name: "build-src"
+        run: npm run build-src
+
+      - name: "Copy files"
+        run: |
+          mkdir ./public/js
+          cp ./dist/gw-templates-es6.js ./public/js
+          cp ./dist/gw-templates-es6-src.js ./public/js
+          cp ./dist/gw-templates-node.cjs ./public/js
+          cp ./dist/gw-templates-node-src.cjs ./public/js
+
       - name: "upload artifacts"
         uses: actions/upload-artifact@v7
         with:
-          name: gw-skilldata-${{ github.sha }}
-          path: ./dist
+          name: gw-templates-${{ github.sha }}
+          path: ./public
 
       - name: "Attach file(s) to release"
-        uses: softprops/action-gh-release@v3
         if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             dist/gw-templates-es6.js
             dist/gw-templates-es6-src.js
             dist/gw-templates-node.cjs
             dist/gw-templates-node-src.cjs
+
+      - name: "Publish files to gh-pages"
+        if: github.ref_name == 'main'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: public
+          clean: true
