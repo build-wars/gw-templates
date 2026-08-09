@@ -33,6 +33,8 @@ An example header with comment:
 pwnd0001?download pawned2 @ memorial.redeemer.biz | Copyright 2008-2018 Redeemer
 ```
 
+The comment should not contain any *greater than* `>` or *less than* `<` signs, as current versions of paw·ned² might end up with a reading error.
+
 ## Body
 
 The body is a base64-like string, enclosed by a *greater than* `>` and a *less than* `<` sign which signify start and end of the body.
