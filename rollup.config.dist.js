@@ -18,6 +18,18 @@ export default {
 			format   : 'cjs',
 			sourcemap: true,
 		},
+		{
+			file     : 'dist/gw-templates-iife.js',
+			format   : 'iife',
+			name     : 'GwTemplates',
+			sourcemap: true,
+		},
+		{
+			file     : 'dist/gw-templates-umd.js',
+			format   : 'umd',
+			name     : 'GwTemplates',
+			sourcemap: true,
+		},
 	],
 	plugins: [
 		babel({

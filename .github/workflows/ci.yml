@@ -169,8 +169,12 @@ jobs:
           mkdir ./public/js
           cp ./dist/gw-templates-es6.js ./public/js
           cp ./dist/gw-templates-es6-src.js ./public/js
+          cp ./dist/gw-templates-iife.js ./public/js
+          cp ./dist/gw-templates-iife-src.js ./public/js
           cp ./dist/gw-templates-node.cjs ./public/js
           cp ./dist/gw-templates-node-src.cjs ./public/js
+          cp ./dist/gw-templates-umd.js ./public/js
+          cp ./dist/gw-templates-umd-src.js ./public/js
 
       - name: "upload artifacts"
         uses: actions/upload-artifact@v7
@@ -185,8 +189,12 @@ jobs:
           files: |
             dist/gw-templates-es6.js
             dist/gw-templates-es6-src.js
+            dist/gw-templates-iife.js
+            dist/gw-templates-iife-src.js
             dist/gw-templates-node.cjs
             dist/gw-templates-node-src.cjs
+            dist/gw-templates-umd.js
+            dist/gw-templates-umd-src.js
 
       - name: "Publish files to gh-pages"
         if: github.ref_name == 'main'

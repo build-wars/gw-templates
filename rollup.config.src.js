@@ -16,6 +16,18 @@ export default {
 			format   : 'cjs',
 			sourcemap: true,
 		},
+		{
+			file     : 'dist/gw-templates-iife-src.js',
+			format   : 'iife',
+			name     : 'GwTemplates',
+			sourcemap: true,
+		},
+		{
+			file     : 'dist/gw-templates-umd-src.js',
+			format   : 'umd',
+			name     : 'GwTemplates',
+			sourcemap: true,
+		},
 	],
 	plugins: [
 		json(),
